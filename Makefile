@@ -27,7 +27,7 @@ TARGET_MAIN     = $(OBJ_DIR)/main.out
 TARGET_TEST    = $(OBJ_DIR)/test.out
 UTILS_SPACERS  = src/mr_utils/build/$(BUILD_TYPE)/spacers
 
-SRC_LIB        = 
+SRC_LIB        =
 SRC_MAIN_MAIN   = src/main.c
 SRC_TEST_MAIN  = test/test.c
 
@@ -76,11 +76,11 @@ bear: clean
 
 format: mr_utils_lib
 	find ./src ./test -name "*.c" -o -name "*.h" | xargs clang-format -i --verbose
-	git ls-files | xargs $(UTILS_SPACERS)
+	git ls-files --recurse-submodules | xargs $(UTILS_SPACERS)
 
 format-check: mr_utils_lib
 	find ./src ./test -name "*.c" -o -name "*.h" | xargs clang-format --dry-run --Werror --verbose
-	git ls-files | xargs $(UTILS_SPACERS)
+	git ls-files --recurse-submodules | xargs $(UTILS_SPACERS)
 
 valgrind:
 	valgrind --leak-check=full --suppressions=valgrind.supp $(TARGET_MAIN)

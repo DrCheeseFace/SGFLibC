@@ -23,30 +23,24 @@ endif
 BUILD_DIR := build
 OBJ_DIR   := $(BUILD_DIR)/$(BUILD_TYPE)
 
-TARGET_MAIN     = $(OBJ_DIR)/main.out
 TARGET_TEST    = $(OBJ_DIR)/test.out
 UTILS_SPACERS  = src/mr_utils/build/$(BUILD_TYPE)/spacers
 
-SRC_LIB        =
-SRC_MAIN_MAIN   = src/main.c
+SRC_LIB        = src/sgf.c
 SRC_TEST_MAIN  = test/test.c
 
 OBJ_LIB        = $(SRC_LIB:%.c=$(OBJ_DIR)/%.o)
-OBJ_MAIN_MAIN   = $(SRC_MAIN_MAIN:%.c=$(OBJ_DIR)/%.o)
 OBJ_TEST_MAIN  = $(SRC_TEST_MAIN:%.c=$(OBJ_DIR)/%.o)
 
-ALL_MAIN_OBJS   = $(OBJ_LIB) $(OBJ_MAIN_MAIN)
+ALL_MAIN_OBJS   = $(OBJ_LIB)
 ALL_TEST_OBJS  = $(OBJ_LIB) $(OBJ_TEST_MAIN)
 
 .PHONY: all test run clean format format-check bear debug build-debug mr_utils_lib
 
-all: $(TARGET_MAIN)
+all: $(TARGET_TEST)
 
 mr_utils_lib:
 	$(MAKE) -C src/mr_utils static-lib spacers BUILD_TYPE=$(BUILD_TYPE)
-
-$(TARGET_MAIN): mr_utils_lib $(ALL_MAIN_OBJS)
-	$(CC) $(ALL_MAIN_OBJS) -o $@ $(LDLIBS)
 
 $(TARGET_TEST): mr_utils_lib $(ALL_TEST_OBJS)
 	$(CC) $(ALL_TEST_OBJS) -o $@ $(LDLIBS)
@@ -58,10 +52,7 @@ $(OBJ_DIR)/%.o: %.c
 test: $(TARGET_TEST)
 	./$(TARGET_TEST)
 
-run: $(TARGET_MAIN)
-	./$(TARGET_MAIN)
-
-build-debug: $(TARGET_MAIN) $(TARGET_TEST)
+build-debug: $(TARGET_TEST)
 
 debug: build-debug
 	./$(TARGET_TEST)
@@ -83,10 +74,10 @@ format-check: mr_utils_lib
 	git ls-files --recurse-submodules | xargs $(UTILS_SPACERS)
 
 valgrind:
-	valgrind --leak-check=full --suppressions=valgrind.supp $(TARGET_MAIN)
+	valgrind --leak-check=full --suppressions=valgrind.supp $(TARGET_TEST)
 
 record:
-	perf record -g --call-graph dwarf $(TARGET_MAIN)
+	perf record -g --call-graph dwarf $(TARGET_TEST)
 	perf script > chombo.perf
 
 -include $(ALL_MAIN_OBJS:.o=.d)

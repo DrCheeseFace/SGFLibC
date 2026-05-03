@@ -2,34 +2,17 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <internal_tokenizer.h>
 #include <mr_utils.h>
-#include <tokenizer.h>
 
-Token create_token(TokenType type, const char *start, int length)
+void token_init(Token *token, TokenType type, const char *start, int length)
 {
-	Token t;
-	t.type = type;
-	t.text = malloc(length + 1);
-	if (t.text) {
-		strncpy(t.text, start, length);
-		t.text[length] = '\0';
+	token->type = type;
+	token->text = malloc(length + 1);
+	if (token->text) {
+		strncpy(token->text, start, length);
+		token->text[length] = '\0';
 	}
-	return t;
-}
-
-void destroy_tokens(MrvVector *tokens)
-{
-	if (tokens == NULL)
-		return;
-
-	for (size_t i = 0; i < tokens->len; i++) {
-		Token *token = mrv_get_idx(tokens, i);
-		if (token->text) {
-			free(token->text);
-		}
-	}
-
-	mrv_destroy(tokens);
 }
 
 MrvVector *tokenize(const char *input)
@@ -49,17 +32,16 @@ MrvVector *tokenize(const char *input)
 		Token t;
 
 		if (*p == '(') {
-			t = create_token(TOKEN_PAREN_OPEN, p++, 1);
+			token_init(&t, TOKEN_PAREN_OPEN, p++, 1);
 		} else if (*p == ')') {
-			t = create_token(TOKEN_PAREN_CLOSE, p++, 1);
+			token_init(&t, TOKEN_PAREN_CLOSE, p++, 1);
 		} else if (*p == ';') {
-			t = create_token(TOKEN_SEMICOLON, p++, 1);
+			token_init(&t, TOKEN_SEMICOLON, p++, 1);
 		} else if (isupper(*p)) {
 			const char *start = p;
 			while (isupper(*p))
 				p++;
-			t = create_token(TOKEN_PROPERTY, start,
-					 (int)(p - start));
+			token_init(&t, TOKEN_PROPERTY, start, (int)(p - start));
 		} else if (*p == '[') {
 			p++; // skip '['
 			const char *start = p;
@@ -68,15 +50,30 @@ MrvVector *tokenize(const char *input)
 					p++;
 				p++;
 			}
-			t = create_token(TOKEN_VALUE, start, (int)(p - start));
+			token_init(&t, TOKEN_VALUE, start, (int)(p - start));
 			if (*p == ']')
 				p++;
 		} else {
-			t = create_token(TOKEN_ERROR, p++, 1);
+			token_init(&t, TOKEN_ERROR, p++, 1);
 		}
 
 		mrv_append(tokens, &t, APPEND_SCALING_DOUBLE);
 	}
 
 	return tokens;
+}
+
+void tokens_destroy(MrvVector *tokens)
+{
+	if (tokens == NULL)
+		return;
+
+	for (size_t i = 0; i < tokens->len; i++) {
+		Token *token = mrv_get_idx(tokens, i);
+		if (token->text) {
+			free(token->text);
+		}
+	}
+
+	mrv_destroy(tokens);
 }

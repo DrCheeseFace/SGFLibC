@@ -1,10 +1,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <internal_tokenizer.h>
 #include <mr_utils.h>
 #include <mr_utils/mrt_test.h>
 #include <sgf.h>
-#include <tokenizer.h>
 
 #define ASSERT_TOKEN(vec, idx, expected_type, expected_text)                   \
 	do {                                                                   \
@@ -40,7 +40,7 @@ MRT_TEST_GROUP(tokenizer_basic_syntax)
 		ASSERT_TOKEN(tokens, 3, TOKEN_VALUE, "19");
 		ASSERT_TOKEN(tokens, 4, TOKEN_PAREN_CLOSE, ")");
 
-		destroy_tokens(tokens);
+		tokens_destroy(tokens);
 	}
 }
 
@@ -54,7 +54,7 @@ MRT_TEST_GROUP(tokenizer_escaped_chars)
 		MRT_ASSERT(tokens->len == 5, "escaped token count");
 		ASSERT_TOKEN(tokens, 3, TOKEN_VALUE,
 			     "Escaped \\] and backslash \\\\ test");
-		destroy_tokens(tokens);
+		tokens_destroy(tokens);
 	}
 }
 
@@ -70,7 +70,7 @@ MRT_TEST_GROUP(tokenizer_multi_value)
 		ASSERT_TOKEN(tokens, 3, TOKEN_VALUE, "aa");
 		ASSERT_TOKEN(tokens, 4, TOKEN_VALUE, "bb");
 		ASSERT_TOKEN(tokens, 5, TOKEN_VALUE, "cc");
-		destroy_tokens(tokens);
+		tokens_destroy(tokens);
 	}
 }
 
@@ -104,7 +104,7 @@ MRT_TEST_GROUP(tokenizer_nested_variations)
 
 		ASSERT_TOKEN(tokens, 14, TOKEN_PAREN_CLOSE, ")");
 
-		destroy_tokens(tokens);
+		tokens_destroy(tokens);
 	}
 }
 

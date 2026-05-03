@@ -1,5 +1,5 @@
-#ifndef TOKENIZER_H
-#define TOKENIZER_H
+#ifndef INTERNAL_TOKENIZER_H
+#define INTERNAL_TOKENIZER_H
 
 #include <mr_utils.h>
 
@@ -18,11 +18,11 @@ typedef struct {
 	char *text;
 } Token;
 
-Token create_token(TokenType type, const char *start, int length);
-
-void destroy_tokens(MrvVector *tokens);
+void token_init(Token *token, TokenType type, const char *start, int length);
 
 MrvVector *tokenize(const char *input);
+// destory for tokenize()
+void tokens_destroy(MrvVector *tokens);
 
 
 #endif

@@ -1,0 +1,49 @@
+(;GM[1]FF[4]CA[UTF-8]AP[CGoban:3]ST[2]
+RU[Japanese]SZ[19]HA[3]KM[6.50]
+PW[whiteplayername]PB[blackplayername]AB[pd][dp][pp]
+(;W[dd]
+;B[fh]
+;W[lg]
+;B[lc]
+;W[hc]
+(;B[mj]
+;W[oe]
+(;B[jo]C[this is a comment for move 8 main line
+
+
+
+]
+;W[im]C[different comment]
+;B[gm]N[named node?]
+;W[nl])
+(;B[ig]
+(;W[ln]
+;B[kn]
+(;W[jn]
+;B[in]
+(;W[im]
+;B[il]
+;W[ik])
+(;W[kj]
+;B[hj]C[supsup coment on deep variation]
+;W[ej]
+;B[cj]))
+(;W[ok]
+;B[ol]
+;W[pk]
+;B[pj]
+;W[oj]))
+(;W[jk]
+;B[jl]
+;W[jm]C[supsupspusp])))
+(;B[]
+;W[qh]
+;B[qi]
+;W[]
+;B[]))
+(;W[jf]
+;B[ie]
+;W[he]
+;B[ge]
+;W[fe]
+;B[ee]))

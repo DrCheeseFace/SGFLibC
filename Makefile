@@ -7,7 +7,7 @@ LDLIBS      = -Lsrc/mr_utils/build/$(BUILD_TYPE) -lmr_utils -lm
 WARNINGS  = -Wall -Wextra -Werror -Wpedantic -pedantic-errors
 WARNINGS += -Wpointer-arith -Wcast-align -Wwrite-strings
 WARNINGS += -Wstrict-prototypes
-WARNINGS += -Wswitch-default -Wswitch-enum -Wunreachable-code
+WARNINGS += -Wswitch-default -Wunreachable-code
 WARNINGS += -Wbad-function-cast -Wcast-qual -Wundef
 WARNINGS += -Wshadow -Wfloat-equal -Wformat=2
 WARNINGS += -Wredundant-decls -Wnested-externs
@@ -26,7 +26,7 @@ OBJ_DIR   := $(BUILD_DIR)/$(BUILD_TYPE)
 TARGET_TEST    = $(OBJ_DIR)/test.out
 UTILS_SPACERS  = src/mr_utils/build/$(BUILD_TYPE)/spacers
 
-SRC_LIB        = src/sgf.c
+SRC_LIB        = src/sgf.c src/tokenizer.c
 SRC_TEST_MAIN  = test/test.c
 
 OBJ_LIB        = $(SRC_LIB:%.c=$(OBJ_DIR)/%.o)

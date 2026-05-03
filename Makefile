@@ -3,6 +3,7 @@ CSTANDARD   = c99
 
 INCLUDES    = -Iinclude -Isrc/mr_utils/include
 LDLIBS      = -Lsrc/mr_utils/build/$(BUILD_TYPE) -lmr_utils -lm
+# LDLIBS      += -lasan
 
 WARNINGS  = -Wall -Wextra -Werror -Wpedantic -pedantic-errors
 WARNINGS += -Wpointer-arith -Wcast-align -Wwrite-strings
@@ -11,6 +12,7 @@ WARNINGS += -Wswitch-default -Wunreachable-code
 WARNINGS += -Wbad-function-cast -Wcast-qual -Wundef
 WARNINGS += -Wshadow -Wfloat-equal -Wformat=2
 WARNINGS += -Wredundant-decls -Wnested-externs
+# WARNINGS += -fsanitize=address
 
 ifneq (,$(filter debug build-debug,$(MAKECMDGOALS)))
     BUILD_TYPE := debug

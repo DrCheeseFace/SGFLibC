@@ -31,17 +31,15 @@ MRT_TEST_GROUP(test_tokenizer_basic_syntax)
 	MrvVector *tokens = SGF_internal_tokeize(basic_sgf);
 
 	MRT_ASSERT(tokens != NULL, "tokenizer allocation");
-	if (tokens) {
-		MRT_ASSERT(tokens->len == 5, "basic token count");
+	MRT_ASSERT(tokens->len == 5, "basic token count");
 
-		ASSERT_TOKEN(tokens, 0, SGF_TOKEN_PAREN_OPEN, "(");
-		ASSERT_TOKEN(tokens, 1, SGF_TOKEN_SEMICOLON, ";");
-		ASSERT_TOKEN(tokens, 2, SGF_TOKEN_PROPERTY, "SZ");
-		ASSERT_TOKEN(tokens, 3, SGF_TOKEN_VALUE, "19");
-		ASSERT_TOKEN(tokens, 4, SGF_TOKEN_PAREN_CLOSE, ")");
+	ASSERT_TOKEN(tokens, 0, SGF_TOKEN_PAREN_OPEN, "(");
+	ASSERT_TOKEN(tokens, 1, SGF_TOKEN_SEMICOLON, ";");
+	ASSERT_TOKEN(tokens, 2, SGF_TOKEN_PROPERTY, "SZ");
+	ASSERT_TOKEN(tokens, 3, SGF_TOKEN_VALUE, "19");
+	ASSERT_TOKEN(tokens, 4, SGF_TOKEN_PAREN_CLOSE, ")");
 
-		SGF_internal_tokens_destroy(tokens);
-	}
+	SGF_internal_tokens_destroy(tokens);
 }
 
 MRT_TEST_GROUP(test_tokenizer_escaped_chars)
@@ -50,12 +48,10 @@ MRT_TEST_GROUP(test_tokenizer_escaped_chars)
 	MrvVector *tokens = SGF_internal_tokeize(escape_sgf);
 
 	MRT_ASSERT(tokens != NULL, "tokenizer escape support");
-	if (tokens) {
-		MRT_ASSERT(tokens->len == 5, "escaped token count");
-		ASSERT_TOKEN(tokens, 3, SGF_TOKEN_VALUE,
-			     "Escaped \\] and backslash \\\\ test");
-		SGF_internal_tokens_destroy(tokens);
-	}
+	MRT_ASSERT(tokens->len == 5, "escaped token count");
+	ASSERT_TOKEN(tokens, 3, SGF_TOKEN_VALUE,
+		     "Escaped \\] and backslash \\\\ test");
+	SGF_internal_tokens_destroy(tokens);
 }
 
 MRT_TEST_GROUP(test_tokenizer_multi_value)
@@ -64,14 +60,12 @@ MRT_TEST_GROUP(test_tokenizer_multi_value)
 	MrvVector *tokens = SGF_internal_tokeize(multi_sgf);
 
 	MRT_ASSERT(tokens != NULL, "tokenizer multi value support");
-	if (tokens) {
-		MRT_ASSERT(tokens->len == 7, "multi token count");
-		ASSERT_TOKEN(tokens, 2, SGF_TOKEN_PROPERTY, "AB");
-		ASSERT_TOKEN(tokens, 3, SGF_TOKEN_VALUE, "aa");
-		ASSERT_TOKEN(tokens, 4, SGF_TOKEN_VALUE, "bb");
-		ASSERT_TOKEN(tokens, 5, SGF_TOKEN_VALUE, "cc");
-		SGF_internal_tokens_destroy(tokens);
-	}
+	MRT_ASSERT(tokens->len == 7, "multi token count");
+	ASSERT_TOKEN(tokens, 2, SGF_TOKEN_PROPERTY, "AB");
+	ASSERT_TOKEN(tokens, 3, SGF_TOKEN_VALUE, "aa");
+	ASSERT_TOKEN(tokens, 4, SGF_TOKEN_VALUE, "bb");
+	ASSERT_TOKEN(tokens, 5, SGF_TOKEN_VALUE, "cc");
+	SGF_internal_tokens_destroy(tokens);
 }
 
 MRT_TEST_GROUP(test_tokenizer_nested_variations)
@@ -80,32 +74,30 @@ MRT_TEST_GROUP(test_tokenizer_nested_variations)
 	MrvVector *tokens = SGF_internal_tokeize(nested_sgf);
 
 	MRT_ASSERT(tokens != NULL, "tokenizer nesting support");
-	if (tokens) {
-		// ( ; B [pd] ( ; W [dp] ) ( ; W [pp] ) )
-		// 0 1 2 3    4 5 6 7    8 9 10 11 12 13 14
-		MRT_ASSERT(tokens->len == 15, "nested tree total token count");
+	// ( ; B [pd] ( ; W [dp] ) ( ; W [pp] ) )
+	// 0 1 2 3    4 5 6 7    8 9 10 11 12 13 14
+	MRT_ASSERT(tokens->len == 15, "nested tree total token count");
 
-		ASSERT_TOKEN(tokens, 0, SGF_TOKEN_PAREN_OPEN, "(");
-		ASSERT_TOKEN(tokens, 1, SGF_TOKEN_SEMICOLON, ";");
-		ASSERT_TOKEN(tokens, 2, SGF_TOKEN_PROPERTY, "B");
-		ASSERT_TOKEN(tokens, 3, SGF_TOKEN_VALUE, "pd");
+	ASSERT_TOKEN(tokens, 0, SGF_TOKEN_PAREN_OPEN, "(");
+	ASSERT_TOKEN(tokens, 1, SGF_TOKEN_SEMICOLON, ";");
+	ASSERT_TOKEN(tokens, 2, SGF_TOKEN_PROPERTY, "B");
+	ASSERT_TOKEN(tokens, 3, SGF_TOKEN_VALUE, "pd");
 
-		ASSERT_TOKEN(tokens, 4, SGF_TOKEN_PAREN_OPEN, "(");
-		ASSERT_TOKEN(tokens, 5, SGF_TOKEN_SEMICOLON, ";");
-		ASSERT_TOKEN(tokens, 6, SGF_TOKEN_PROPERTY, "W");
-		ASSERT_TOKEN(tokens, 7, SGF_TOKEN_VALUE, "dp");
-		ASSERT_TOKEN(tokens, 8, SGF_TOKEN_PAREN_CLOSE, ")");
+	ASSERT_TOKEN(tokens, 4, SGF_TOKEN_PAREN_OPEN, "(");
+	ASSERT_TOKEN(tokens, 5, SGF_TOKEN_SEMICOLON, ";");
+	ASSERT_TOKEN(tokens, 6, SGF_TOKEN_PROPERTY, "W");
+	ASSERT_TOKEN(tokens, 7, SGF_TOKEN_VALUE, "dp");
+	ASSERT_TOKEN(tokens, 8, SGF_TOKEN_PAREN_CLOSE, ")");
 
-		ASSERT_TOKEN(tokens, 9, SGF_TOKEN_PAREN_OPEN, "(");
-		ASSERT_TOKEN(tokens, 10, SGF_TOKEN_SEMICOLON, ";");
-		ASSERT_TOKEN(tokens, 11, SGF_TOKEN_PROPERTY, "W");
-		ASSERT_TOKEN(tokens, 12, SGF_TOKEN_VALUE, "pp");
-		ASSERT_TOKEN(tokens, 13, SGF_TOKEN_PAREN_CLOSE, ")");
+	ASSERT_TOKEN(tokens, 9, SGF_TOKEN_PAREN_OPEN, "(");
+	ASSERT_TOKEN(tokens, 10, SGF_TOKEN_SEMICOLON, ";");
+	ASSERT_TOKEN(tokens, 11, SGF_TOKEN_PROPERTY, "W");
+	ASSERT_TOKEN(tokens, 12, SGF_TOKEN_VALUE, "pp");
+	ASSERT_TOKEN(tokens, 13, SGF_TOKEN_PAREN_CLOSE, ")");
 
-		ASSERT_TOKEN(tokens, 14, SGF_TOKEN_PAREN_CLOSE, ")");
+	ASSERT_TOKEN(tokens, 14, SGF_TOKEN_PAREN_CLOSE, ")");
 
-		SGF_internal_tokens_destroy(tokens);
-	}
+	SGF_internal_tokens_destroy(tokens);
 }
 
 int main(void)

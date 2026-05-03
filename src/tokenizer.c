@@ -5,7 +5,8 @@
 #include <internal_tokenizer.h>
 #include <mr_utils.h>
 
-void token_init(Token *token, TokenType type, const char *start, int length)
+mr_internal void token_init(SGF_Token *token, SGF_TokenType type,
+			    const char *start, size_t length)
 {
 	token->type = type;
 	token->text = malloc(length + 1);
@@ -15,12 +16,12 @@ void token_init(Token *token, TokenType type, const char *start, int length)
 	}
 }
 
-MrvVector *tokenize(const char *input)
+MrvVector *SGF_internal_tokeize(const char *input)
 {
 	if (input == NULL)
 		return NULL;
 
-	MrvVector *tokens = mrv_create(32, sizeof(Token));
+	MrvVector *tokens = mrv_create(32, sizeof(SGF_Token));
 	const char *p = input;
 
 	while (*p != '\0') {
@@ -29,19 +30,19 @@ MrvVector *tokenize(const char *input)
 			continue;
 		}
 
-		Token t;
+		SGF_Token t;
 
 		if (*p == '(') {
-			token_init(&t, TOKEN_PAREN_OPEN, p++, 1);
+			token_init(&t, SGF_TOKEN_PAREN_OPEN, p++, 1);
 		} else if (*p == ')') {
-			token_init(&t, TOKEN_PAREN_CLOSE, p++, 1);
+			token_init(&t, SGF_TOKEN_PAREN_CLOSE, p++, 1);
 		} else if (*p == ';') {
-			token_init(&t, TOKEN_SEMICOLON, p++, 1);
+			token_init(&t, SGF_TOKEN_SEMICOLON, p++, 1);
 		} else if (isupper(*p)) {
 			const char *start = p;
 			while (isupper(*p))
 				p++;
-			token_init(&t, TOKEN_PROPERTY, start, (int)(p - start));
+			token_init(&t, SGF_TOKEN_PROPERTY, start, p - start);
 		} else if (*p == '[') {
 			p++; // skip '['
 			const char *start = p;
@@ -50,11 +51,11 @@ MrvVector *tokenize(const char *input)
 					p++;
 				p++;
 			}
-			token_init(&t, TOKEN_VALUE, start, (int)(p - start));
+			token_init(&t, SGF_TOKEN_VALUE, start, p - start);
 			if (*p == ']')
 				p++;
 		} else {
-			token_init(&t, TOKEN_ERROR, p++, 1);
+			token_init(&t, SGF_TOKEN_ERROR, p++, 1);
 		}
 
 		mrv_append(tokens, &t, APPEND_SCALING_DOUBLE);
@@ -63,13 +64,13 @@ MrvVector *tokenize(const char *input)
 	return tokens;
 }
 
-void tokens_destroy(MrvVector *tokens)
+void SGF_internal_tokens_destroy(MrvVector *tokens)
 {
 	if (tokens == NULL)
 		return;
 
 	for (size_t i = 0; i < tokens->len; i++) {
-		Token *token = mrv_get_idx(tokens, i);
+		SGF_Token *token = mrv_get_idx(tokens, i);
 		if (token->text) {
 			free(token->text);
 		}

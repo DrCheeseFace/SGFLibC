@@ -20,7 +20,7 @@ typedef struct {
 		uint8_t Score;
 		char Resignation;
 	} score;
-} Result;
+} SGF_Result;
 
 struct SGF_Location {
 	uint8_t row;
@@ -72,7 +72,7 @@ enum SGF_Property {
 	SGF_PROPERTIES_COUNT,
 };
 
-extern const char *SGF_PropertyKey[SGF_PROPERTIES_COUNT];
+extern const char *SGF_property_key[SGF_PROPERTIES_COUNT];
 
 typedef struct {
 	// Add Black: locations of Black stones to be placed on the board prior to the first move
@@ -124,7 +124,7 @@ typedef struct {
 	char *WT;
 
 	// Result: result, usually in the format "B+R" or "B+3.5".
-	Result RE;
+	SGF_Result RE;
 	// Komi: komi.
 	float KM;
 	// Time limit: time limit in seconds.

@@ -4,25 +4,22 @@
 #include <mr_utils.h>
 
 typedef enum {
-	TOKEN_PAREN_OPEN,
-	TOKEN_PAREN_CLOSE,
-	TOKEN_SEMICOLON,
-	TOKEN_PROPERTY,
-	TOKEN_VALUE,
-	TOKEN_EOF,
-	TOKEN_ERROR
-} TokenType;
+	SGF_TOKEN_PAREN_OPEN,
+	SGF_TOKEN_PAREN_CLOSE,
+	SGF_TOKEN_SEMICOLON,
+	SGF_TOKEN_PROPERTY,
+	SGF_TOKEN_VALUE,
+	SGF_TOKEN_EOF,
+	SGF_TOKEN_ERROR
+} SGF_TokenType;
 
 typedef struct {
-	TokenType type;
+	SGF_TokenType type;
 	char *text;
-} Token;
+} SGF_Token;
 
-void token_init(Token *token, TokenType type, const char *start, int length);
-
-MrvVector *tokenize(const char *input);
-// destory for tokenize()
-void tokens_destroy(MrvVector *tokens);
-
+// destroy using SGF_internal_tokens_destroy()
+MrvVector *SGF_internal_tokeize(const char *input);
+void SGF_internal_tokens_destroy(MrvVector *tokens);
 
 #endif

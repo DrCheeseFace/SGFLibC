@@ -4,7 +4,7 @@
 #include <sgf.h>
 #include <string.h>
 
-const char *SGF_PropertyKey[SGF_PROPERTIES_COUNT] = {
+const char *SGF_property_key[SGF_PROPERTIES_COUNT] = {
 	"W",  "B",  "AB", "AW", "AN", "AP", "BR", "BT", "C",  "CP", "DT",
 	"EV", "FF", "GN", "OT", "PB", "PC", "PW", "RO", "SO", "US", "WR",
 	"WT", "RE", "KM", "TM", "PL", "RU", "GM", "HA", "ON", "SZ",

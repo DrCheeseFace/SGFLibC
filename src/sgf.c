@@ -41,6 +41,8 @@ SGF_Sgf *SGF_read(unused FILE *file)
 	SGF_internal_init_AB_locations(sgf, tokens);
 	SGF_internal_init_AW_locations(sgf, tokens);
 	SGF_internal_init_RU(sgf, tokens);
+	SGF_internal_init_single_value_str_property(tokens, SGF_PROPERTIES_AP,
+						    &sgf->AP);
 
 	SGF_internal_tokens_destroy(tokens);
 	return sgf;
@@ -54,6 +56,10 @@ void SGF_destroy(SGF_Sgf *sgf)
 
 	if (sgf->AW) {
 		free(sgf->AW);
+	}
+
+	if (sgf->AP) {
+		free(sgf->AP);
 	}
 
 	free(sgf);

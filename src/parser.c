@@ -91,7 +91,13 @@ void SGF_internal_init_RU(SGF_Sgf *sgf, MrvVector *tokens)
 {
 	MrvVector *RU_property_tokens =
 		SGF_internal_get_property_tokens(tokens, SGF_PROPERTIES_RU);
+
 	if (RU_property_tokens != NULL) {
+		if (RU_property_tokens->len != 1) {
+			SGF_internal_tokens_destroy(RU_property_tokens);
+			return;
+		}
+
 		SGF_Token *ruleset_value_token =
 			mrv_get_idx(RU_property_tokens, 0);
 
@@ -105,7 +111,28 @@ void SGF_internal_init_RU(SGF_Sgf *sgf, MrvVector *tokens)
 				break;
 			}
 		}
-	}
 
-	SGF_internal_tokens_destroy(RU_property_tokens);
+		SGF_internal_tokens_destroy(RU_property_tokens);
+	}
+}
+
+void SGF_internal_init_single_value_str_property(MrvVector *tokens,
+						 enum SGF_Property property,
+						 char **dest)
+{
+	MrvVector *property_tokens =
+		SGF_internal_get_property_tokens(tokens, property);
+	if (property_tokens != NULL) {
+		if (property_tokens->len != 1) {
+			SGF_internal_tokens_destroy(property_tokens);
+			return;
+		}
+
+		SGF_Token *value_token = mrv_get_idx(property_tokens, 0);
+
+		*dest = malloc(strlen(value_token->text) + 1);
+		strcpy(*dest, value_token->text);
+
+		SGF_internal_tokens_destroy(property_tokens);
+	}
 }

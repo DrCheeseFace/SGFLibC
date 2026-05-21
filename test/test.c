@@ -216,6 +216,32 @@ MRT_TEST_GROUP(test_init_RU)
 	SGF_destroy(sgf);
 }
 
+MRT_TEST_GROUP(test_init_single_value_str_property)
+{
+	char *out_val = NULL;
+	const char *sgf_str = "(;GM[1]FF[4]CA[UTF-8]AP[CGoban:3]ST[2]";
+	MrvVector *tokens = SGF_internal_tokeize(sgf_str);
+
+	SGF_internal_init_single_value_str_property(tokens, SGF_PROPERTIES_AP,
+						    &out_val);
+
+	MRT_ASSERT(out_val != NULL, "init property not NULL");
+	MRT_ASSERT(strcmp(out_val, "CGoban:3") == 0, "init property value");
+
+	SGF_internal_tokens_destroy(tokens);
+	free(out_val);
+
+	out_val = NULL;
+	sgf_str = "(;GM[1]FF[4]CA[UTF-8]ST[2]";
+	tokens = SGF_internal_tokeize(sgf_str);
+
+	SGF_internal_init_single_value_str_property(tokens, SGF_PROPERTIES_AP,
+						    &out_val);
+	MRT_ASSERT(out_val == NULL, "init property undefined");
+
+	SGF_internal_tokens_destroy(tokens);
+}
+
 int main(void)
 {
 	MrlLogger *logger = mrl_create(stderr, TRUE, FALSE);
@@ -229,6 +255,7 @@ int main(void)
 	MRT_REGISTER_TEST_GROUP(ctx, test_get_property_tokens);
 	MRT_REGISTER_TEST_GROUP(ctx, test_init_AW_AB_locations);
 	MRT_REGISTER_TEST_GROUP(ctx, test_init_RU);
+	MRT_REGISTER_TEST_GROUP(ctx, test_init_single_value_str_property);
 
 #ifdef DEBUG
 	Err err = mrt_ctx_run(ctx, FALSE);

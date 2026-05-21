@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <internal_parser.h>
 #include <internal_tokenizer.h>
 #include <mr_utils.h>
 #include <mr_utils/mrt_test.h>
@@ -21,8 +22,7 @@
 MRT_TEST_GROUP(test_sanity_check)
 {
 	void *out = SGF_read(NULL);
-	MRT_ASSERT(out != NULL, "sgf_read null safety");
-	free(out);
+	MRT_ASSERT(out == NULL, "sgf_read null safety");
 }
 
 MRT_TEST_GROUP(test_tokenizer_basic_syntax)
@@ -100,6 +100,122 @@ MRT_TEST_GROUP(test_tokenizer_nested_variations)
 	SGF_internal_tokens_destroy(tokens);
 }
 
+MRT_TEST_GROUP(test_get_property_tokens)
+{
+	const char *sgf =
+		"PW[whiteplayername]PB[blackplayername]AB[pd][dp][pp](;W[dd]";
+	MrvVector *tokens = SGF_internal_tokeize(sgf);
+
+	MrvVector *PW_tokens =
+		SGF_internal_get_property_tokens(tokens, SGF_PROPERTIES_PW);
+	ASSERT_TOKEN(PW_tokens, 0, SGF_TOKEN_VALUE, "whiteplayername");
+	MRT_ASSERT(PW_tokens->len == 1, "PW property tokens length");
+	SGF_internal_tokens_destroy(PW_tokens);
+
+	MrvVector *AB_tokens =
+		SGF_internal_get_property_tokens(tokens, SGF_PROPERTIES_AB);
+	ASSERT_TOKEN(AB_tokens, 0, SGF_TOKEN_VALUE, "pd");
+	ASSERT_TOKEN(AB_tokens, 1, SGF_TOKEN_VALUE, "dp");
+	ASSERT_TOKEN(AB_tokens, 2, SGF_TOKEN_VALUE, "pp");
+	MRT_ASSERT(AB_tokens->len == 3, "AB property tokens length");
+	SGF_internal_tokens_destroy(AB_tokens);
+
+	SGF_internal_tokens_destroy(tokens);
+}
+
+MRT_TEST_GROUP(test_init_AW_AB_locations)
+{
+	SGF_Sgf *sgf = malloc(sizeof(*sgf));
+	memset(sgf, 0, sizeof(*sgf));
+	const char *sgf_str =
+		"PW[whiteplayername]PB[blackplayername]AB[aa][ab][cd](;W[dd]";
+	MrvVector *tokens = SGF_internal_tokeize(sgf_str);
+
+	SGF_internal_init_AW_locations(sgf, tokens);
+	MRT_ASSERT(sgf->AW_len == 0, "AW location length");
+	MRT_ASSERT(sgf->AW == NULL, "AW locations null");
+
+	SGF_internal_init_AB_locations(sgf, tokens);
+	MRT_ASSERT(sgf->AB_len == 3, "AB locations length");
+	MRT_ASSERT(sgf->AB[0].col == 1, "AB location 1 col ");
+	MRT_ASSERT(sgf->AB[0].row == 1, "AB location 1 row");
+	MRT_ASSERT(sgf->AB[1].col == 1, "AB location 2 col ");
+	MRT_ASSERT(sgf->AB[1].row == 2, "AB location 2 row");
+	MRT_ASSERT(sgf->AB[2].col == 3, "AB location 3 col ");
+	MRT_ASSERT(sgf->AB[2].row == 4, "AB location 3 row");
+
+	SGF_internal_tokens_destroy(tokens);
+	SGF_destroy(sgf);
+
+	sgf = malloc(sizeof(*sgf));
+	memset(sgf, 0, sizeof(*sgf));
+	sgf_str = "PW[whiteplayername]PB[blackplayername]AW[aa][ab][cd](;W[dd]";
+	tokens = SGF_internal_tokeize(sgf_str);
+
+	SGF_internal_init_AB_locations(sgf, tokens);
+	MRT_ASSERT(sgf->AB_len == 0, "AB location length");
+	MRT_ASSERT(sgf->AB == NULL, "AB locations null");
+
+	SGF_internal_init_AW_locations(sgf, tokens);
+	MRT_ASSERT(sgf->AW_len == 3, "AW locations length");
+	MRT_ASSERT(sgf->AW[0].col == 1, "AW location 1 col ");
+	MRT_ASSERT(sgf->AW[0].row == 1, "AW location 1 row");
+	MRT_ASSERT(sgf->AW[1].col == 1, "AW location 2 col ");
+	MRT_ASSERT(sgf->AW[1].row == 2, "AW location 2 row");
+	MRT_ASSERT(sgf->AW[2].col == 3, "AW location 3 col ");
+	MRT_ASSERT(sgf->AW[2].row == 4, "AW location 3 row");
+
+	SGF_internal_tokens_destroy(tokens);
+	SGF_destroy(sgf);
+}
+
+MRT_TEST_GROUP(test_init_RU)
+{
+	SGF_Sgf *sgf = malloc(sizeof(*sgf));
+	memset(sgf, 0, sizeof(*sgf));
+	const char *sgf_str = "SZ[19]HA[3]RU[Japanese]KM[6.50]";
+	MrvVector *tokens = SGF_internal_tokeize(sgf_str);
+
+	SGF_internal_init_RU(sgf, tokens);
+	MRT_ASSERT(sgf->RU == SGF_RULESET_JAPANESE, "init ruleset japanese");
+
+	SGF_internal_tokens_destroy(tokens);
+	SGF_destroy(sgf);
+
+	sgf = malloc(sizeof(*sgf));
+	memset(sgf, 0, sizeof(*sgf));
+	sgf_str = "SZ[19]HA[3]RU[Chinese]KM[6.50]";
+	tokens = SGF_internal_tokeize(sgf_str);
+
+	SGF_internal_init_RU(sgf, tokens);
+	MRT_ASSERT(sgf->RU == SGF_RULESET_CHINESE, "init ruleset chinese");
+
+	SGF_internal_tokens_destroy(tokens);
+	SGF_destroy(sgf);
+
+	sgf = malloc(sizeof(*sgf));
+	memset(sgf, 0, sizeof(*sgf));
+	sgf_str = "SZ[19]HA[3]KM[6.50]";
+	tokens = SGF_internal_tokeize(sgf_str);
+
+	SGF_internal_init_RU(sgf, tokens);
+	MRT_ASSERT(sgf->RU == SGF_RULESET_NONE, "init ruleset not set");
+
+	SGF_internal_tokens_destroy(tokens);
+	SGF_destroy(sgf);
+
+	sgf = malloc(sizeof(*sgf));
+	memset(sgf, 0, sizeof(*sgf));
+	sgf_str = "SZ[19]RU[meatballs]HA[3]KM[6.50]";
+	tokens = SGF_internal_tokeize(sgf_str);
+
+	SGF_internal_init_RU(sgf, tokens);
+	MRT_ASSERT(sgf->RU == SGF_RULESET_NONE, "init ruleset invalid");
+
+	SGF_internal_tokens_destroy(tokens);
+	SGF_destroy(sgf);
+}
+
 int main(void)
 {
 	MrlLogger *logger = mrl_create(stderr, TRUE, FALSE);
@@ -110,6 +226,9 @@ int main(void)
 	MRT_REGISTER_TEST_GROUP(ctx, test_tokenizer_escaped_chars);
 	MRT_REGISTER_TEST_GROUP(ctx, test_tokenizer_multi_value);
 	MRT_REGISTER_TEST_GROUP(ctx, test_tokenizer_nested_variations);
+	MRT_REGISTER_TEST_GROUP(ctx, test_get_property_tokens);
+	MRT_REGISTER_TEST_GROUP(ctx, test_init_AW_AB_locations);
+	MRT_REGISTER_TEST_GROUP(ctx, test_init_RU);
 
 #ifdef DEBUG
 	Err err = mrt_ctx_run(ctx, FALSE);

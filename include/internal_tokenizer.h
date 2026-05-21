@@ -2,6 +2,7 @@
 #define INTERNAL_TOKENIZER_H
 
 #include <mr_utils.h>
+#include <sgf.h>
 
 typedef enum {
 	SGF_TOKEN_PAREN_OPEN,
@@ -19,7 +20,11 @@ typedef struct {
 } SGF_Token;
 
 // destroy using SGF_internal_tokens_destroy()
+// returns MrvVector of SGF_Token
 MrvVector *SGF_internal_tokeize(const char *input);
 void SGF_internal_tokens_destroy(MrvVector *tokens);
+void SGF_internal_token_init(SGF_Token *token, SGF_TokenType type,
+			    const char *text, size_t text_len);
+
 
 #endif

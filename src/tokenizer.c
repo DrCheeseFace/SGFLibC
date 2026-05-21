@@ -5,17 +5,6 @@
 #include <internal_tokenizer.h>
 #include <mr_utils.h>
 
-mr_internal void token_init(SGF_Token *token, SGF_TokenType type,
-			    const char *start, size_t length)
-{
-	token->type = type;
-	token->text = malloc(length + 1);
-	if (token->text) {
-		strncpy(token->text, start, length);
-		token->text[length] = '\0';
-	}
-}
-
 MrvVector *SGF_internal_tokeize(const char *input)
 {
 	if (input == NULL)
@@ -33,16 +22,20 @@ MrvVector *SGF_internal_tokeize(const char *input)
 		SGF_Token t;
 
 		if (*p == '(') {
-			token_init(&t, SGF_TOKEN_PAREN_OPEN, p++, 1);
+			SGF_internal_token_init(&t, SGF_TOKEN_PAREN_OPEN, p++,
+						1);
 		} else if (*p == ')') {
-			token_init(&t, SGF_TOKEN_PAREN_CLOSE, p++, 1);
+			SGF_internal_token_init(&t, SGF_TOKEN_PAREN_CLOSE, p++,
+						1);
 		} else if (*p == ';') {
-			token_init(&t, SGF_TOKEN_SEMICOLON, p++, 1);
+			SGF_internal_token_init(&t, SGF_TOKEN_SEMICOLON, p++,
+						1);
 		} else if (isupper(*p)) {
 			const char *start = p;
 			while (isupper(*p))
 				p++;
-			token_init(&t, SGF_TOKEN_PROPERTY, start, p - start);
+			SGF_internal_token_init(&t, SGF_TOKEN_PROPERTY, start,
+						p - start);
 		} else if (*p == '[') {
 			p++; // skip '['
 			const char *start = p;
@@ -51,11 +44,12 @@ MrvVector *SGF_internal_tokeize(const char *input)
 					p++;
 				p++;
 			}
-			token_init(&t, SGF_TOKEN_VALUE, start, p - start);
+			SGF_internal_token_init(&t, SGF_TOKEN_VALUE, start,
+						p - start);
 			if (*p == ']')
 				p++;
 		} else {
-			token_init(&t, SGF_TOKEN_ERROR, p++, 1);
+			SGF_internal_token_init(&t, SGF_TOKEN_ERROR, p++, 1);
 		}
 
 		mrv_append(tokens, &t, APPEND_SCALING_DOUBLE);
@@ -77,4 +71,15 @@ void SGF_internal_tokens_destroy(MrvVector *tokens)
 	}
 
 	mrv_destroy(tokens);
+}
+
+void SGF_internal_token_init(SGF_Token *token, SGF_TokenType type,
+			     const char *text, size_t text_len)
+{
+	token->type = type;
+	token->text = malloc(text_len + 1);
+	if (token->text) {
+		strncpy(token->text, text, text_len);
+		token->text[text_len] = '\0';
+	}
 }

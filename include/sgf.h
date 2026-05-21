@@ -5,7 +5,14 @@
 #include <stdio.h>
 
 enum SGF_Player { SGF_PLAYER_BLACK, SGF_PLAYER_WHITE };
-enum SGF_Ruleset { SGF_RULESET_CHINESE, SGF_RULESET_JAPANESE };
+
+enum SGF_Ruleset {
+	SGF_RULESET_NONE = 0,
+	SGF_RULESET_CHINESE,
+	SGF_RULESET_JAPANESE,
+	SGF_RULESET_COUNT
+};
+extern const char *SGF_ruleset_key[SGF_RULESET_COUNT];
 
 enum SGF_ResultTag {
 	SGF_RESULT_TYPE_RESIGNATION,
@@ -23,8 +30,8 @@ typedef struct {
 } SGF_Result;
 
 struct SGF_Location {
-	uint8_t row;
 	uint8_t col;
+	uint8_t row;
 };
 
 struct SGF_Move {
@@ -71,7 +78,6 @@ enum SGF_Property {
 
 	SGF_PROPERTIES_COUNT,
 };
-
 extern const char *SGF_property_key[SGF_PROPERTIES_COUNT];
 
 typedef struct {
@@ -132,7 +138,7 @@ typedef struct {
 	// Player: color of player to start.
 	enum SGF_Player PL;
 	// Rules: ruleset
-	enum SGF_Ruleset RU;
+	enum SGF_Ruleset RU; // TODO maybe can just be char*?
 	// Number of initial Black stones
 	uint8_t AB_len;
 	// Number of initial White stones

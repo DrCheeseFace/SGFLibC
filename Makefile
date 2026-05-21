@@ -16,7 +16,7 @@ WARNINGS += -Wredundant-decls -Wnested-externs
 
 ifneq (,$(filter debug build-debug,$(MAKECMDGOALS)))
     BUILD_TYPE := debug
-    CFLAGS     := -O0 -g -fno-omit-frame-pointer -rdynamic -DDEBUG -DMRD_DEBUG_ONLY_CALLED_AND_ERR $(WARNINGS) $(INCLUDES)
+    CFLAGS     := -O0 -g -fno-omit-frame-pointer -rdynamic -DDEBUG -DMRD_DEBUG_DEFAULT $(WARNINGS) $(INCLUDES)
 else
     BUILD_TYPE := release
     CFLAGS     := -O2 $(WARNINGS) $(INCLUDES)
@@ -28,7 +28,7 @@ OBJ_DIR   := $(BUILD_DIR)/$(BUILD_TYPE)
 TARGET_TEST    = $(OBJ_DIR)/test.out
 UTILS_SPACERS  = src/mr_utils/build/$(BUILD_TYPE)/spacers
 
-SRC_LIB        = src/sgf.c src/tokenizer.c
+SRC_LIB        = src/sgf.c src/tokenizer.c src/parser.c
 SRC_TEST_MAIN  = test/test.c
 
 OBJ_LIB        = $(SRC_LIB:%.c=$(OBJ_DIR)/%.o)

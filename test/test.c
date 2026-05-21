@@ -131,11 +131,13 @@ MRT_TEST_GROUP(test_init_AW_AB_locations)
 		"PW[whiteplayername]PB[blackplayername]AB[aa][ab][cd](;W[dd]";
 	MrvVector *tokens = SGF_internal_tokeize(sgf_str);
 
-	SGF_internal_init_AW_locations(tokens, &locations, &len);
+	SGF_internal_init_locations_by_property(tokens, SGF_PROPERTIES_AW,
+						&locations, &len);
 	MRT_ASSERT(len == 0, "AW location length");
 	MRT_ASSERT(locations == NULL, "AW locations null");
 
-	SGF_internal_init_AB_locations(tokens, &locations, &len);
+	SGF_internal_init_locations_by_property(tokens, SGF_PROPERTIES_AB,
+						&locations, &len);
 	MRT_ASSERT(len, "AB locations length");
 	MRT_ASSERT(locations[0].col == 1, "AB location 1 col ");
 	MRT_ASSERT(locations[0].row == 1, "AB location 1 row");
@@ -152,11 +154,13 @@ MRT_TEST_GROUP(test_init_AW_AB_locations)
 	sgf_str = "PW[whiteplayername]PB[blackplayername]AW[aa][ab][cd](;W[dd]";
 	tokens = SGF_internal_tokeize(sgf_str);
 
-	SGF_internal_init_AB_locations(tokens, &locations, &len);
+	SGF_internal_init_locations_by_property(tokens, SGF_PROPERTIES_AB,
+						&locations, &len);
 	MRT_ASSERT(len == 0, "AB location length");
 	MRT_ASSERT(locations == NULL, "AB locations null");
 
-	SGF_internal_init_AW_locations(tokens, &locations, &len);
+	SGF_internal_init_locations_by_property(tokens, SGF_PROPERTIES_AW,
+						&locations, &len);
 	MRT_ASSERT(len == 3, "AW locations length");
 	MRT_ASSERT(locations[0].col == 1, "AW location 1 col ");
 	MRT_ASSERT(locations[0].row == 1, "AW location 1 row");

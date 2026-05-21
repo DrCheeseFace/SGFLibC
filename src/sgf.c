@@ -38,8 +38,11 @@ SGF_Sgf *SGF_read(unused FILE *file)
 	MrvVector *tokens = SGF_internal_tokeize(buffer);
 	free(buffer);
 
-	SGF_internal_init_AB_locations(tokens, &sgf->AB, &sgf->AB_len);
-	SGF_internal_init_AW_locations(tokens, &sgf->AW, &sgf->AW_len);
+	SGF_internal_init_locations_by_property(tokens, SGF_PROPERTIES_AW,
+						&sgf->AW, &sgf->AW_len);
+	SGF_internal_init_locations_by_property(tokens, SGF_PROPERTIES_AB,
+						&sgf->AB, &sgf->AB_len);
+
 	SGF_internal_init_RU(tokens, &sgf->RU);
 	SGF_internal_init_single_value_str_property(tokens, SGF_PROPERTIES_AP,
 						    &sgf->AP);

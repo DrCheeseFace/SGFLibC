@@ -51,49 +51,25 @@ void SGF_internal_init_location(SGF_Token location_token,
 	dest->row = location_token.text[1] - 96;
 }
 
-void SGF_internal_init_AB_locations(MrvVector *tokens,
-				    struct SGF_Location **dest_locations,
-				    uint8_t *dest_len)
+void SGF_internal_init_locations_by_property(
+	MrvVector *tokens, enum SGF_Property property,
+	struct SGF_Location **dest_locations, uint8_t *dest_len)
 {
-	MrvVector *AB_tokens =
-		SGF_internal_get_property_tokens(tokens, SGF_PROPERTIES_AB);
-	if (AB_tokens != NULL) {
+	MrvVector *prop_tokens =
+		SGF_internal_get_property_tokens(tokens, property);
+	if (prop_tokens != NULL) {
 		// TODO null check
 		*dest_locations =
-			calloc(AB_tokens->len, sizeof(**dest_locations));
-		*dest_len = AB_tokens->len;
+			calloc(prop_tokens->len, sizeof(**dest_locations));
+		*dest_len = prop_tokens->len;
 
-		for (uint i = 0; i < AB_tokens->len; i++) {
-			SGF_Token *token = mrv_get_idx(AB_tokens, i);
+		for (uint i = 0; i < prop_tokens->len; i++) {
+			SGF_Token *token = mrv_get_idx(prop_tokens, i);
 			SGF_internal_init_location(*token,
 						   &(*dest_locations)[i]);
 		}
 
-		SGF_internal_tokens_destroy(AB_tokens);
-	} else {
-		*dest_len = 0;
-	}
-}
-
-void SGF_internal_init_AW_locations(MrvVector *tokens,
-				    struct SGF_Location **dest_locations,
-				    uint8_t *dest_len)
-{
-	MrvVector *AW_tokens =
-		SGF_internal_get_property_tokens(tokens, SGF_PROPERTIES_AW);
-	if (AW_tokens != NULL) {
-		// TODO null check
-		*dest_locations =
-			calloc(AW_tokens->len, sizeof(**dest_locations));
-		*dest_len = AW_tokens->len;
-
-		for (uint i = 0; i < AW_tokens->len; i++) {
-			SGF_Token *token = mrv_get_idx(AW_tokens, i);
-			SGF_internal_init_location(*token,
-						   &(*dest_locations)[i]);
-		}
-
-		SGF_internal_tokens_destroy(AW_tokens);
+		SGF_internal_tokens_destroy(prop_tokens);
 	} else {
 		*dest_len = 0;
 	}

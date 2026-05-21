@@ -51,44 +51,58 @@ void SGF_internal_init_location(SGF_Token location_token,
 	dest->row = location_token.text[1] - 96;
 }
 
-void SGF_internal_init_AB_locations(SGF_Sgf *sgf, MrvVector *tokens)
+void SGF_internal_init_AB_locations(MrvVector *tokens,
+				    struct SGF_Location **dest_locations,
+				    uint8_t *dest_len)
 {
 	MrvVector *AB_tokens =
 		SGF_internal_get_property_tokens(tokens, SGF_PROPERTIES_AB);
 	if (AB_tokens != NULL) {
 		// TODO null check
-		sgf->AB = calloc(AB_tokens->len, sizeof(*sgf->AB));
-		sgf->AB_len = AB_tokens->len;
+		*dest_locations =
+			calloc(AB_tokens->len, sizeof(**dest_locations));
+		*dest_len = AB_tokens->len;
 
 		for (uint i = 0; i < AB_tokens->len; i++) {
 			SGF_Token *token = mrv_get_idx(AB_tokens, i);
-			SGF_internal_init_location(*token, &sgf->AB[i]);
+			SGF_internal_init_location(*token,
+						   &(*dest_locations)[i]);
 		}
 
 		SGF_internal_tokens_destroy(AB_tokens);
+	} else {
+		*dest_len = 0;
 	}
 }
 
-void SGF_internal_init_AW_locations(SGF_Sgf *sgf, MrvVector *tokens)
+void SGF_internal_init_AW_locations(MrvVector *tokens,
+				    struct SGF_Location **dest_locations,
+				    uint8_t *dest_len)
 {
 	MrvVector *AW_tokens =
 		SGF_internal_get_property_tokens(tokens, SGF_PROPERTIES_AW);
 	if (AW_tokens != NULL) {
 		// TODO null check
-		sgf->AW = calloc(AW_tokens->len, sizeof(*sgf->AW));
-		sgf->AW_len = AW_tokens->len;
+		*dest_locations =
+			calloc(AW_tokens->len, sizeof(**dest_locations));
+		*dest_len = AW_tokens->len;
 
 		for (uint i = 0; i < AW_tokens->len; i++) {
 			SGF_Token *token = mrv_get_idx(AW_tokens, i);
-			SGF_internal_init_location(*token, &sgf->AW[i]);
+			SGF_internal_init_location(*token,
+						   &(*dest_locations)[i]);
 		}
 
 		SGF_internal_tokens_destroy(AW_tokens);
+	} else {
+		*dest_len = 0;
 	}
 }
 
-void SGF_internal_init_RU(SGF_Sgf *sgf, MrvVector *tokens)
+void SGF_internal_init_RU(MrvVector *tokens, enum SGF_Ruleset *dest)
 {
+	*dest = SGF_RULESET_NONE;
+
 	MrvVector *RU_property_tokens =
 		SGF_internal_get_property_tokens(tokens, SGF_PROPERTIES_RU);
 
@@ -101,13 +115,12 @@ void SGF_internal_init_RU(SGF_Sgf *sgf, MrvVector *tokens)
 		SGF_Token *ruleset_value_token =
 			mrv_get_idx(RU_property_tokens, 0);
 
-		sgf->RU = SGF_RULESET_NONE;
 		// loop doesnt check SGF_RULESET_NONE
 		for (uint i = SGF_RULESET_NONE + 1; i < SGF_RULESET_COUNT;
 		     i++) {
 			if (strcmp(SGF_ruleset_key[i],
 				   ruleset_value_token->text) == 0) {
-				sgf->RU = i;
+				*dest = i;
 				break;
 			}
 		}
@@ -116,6 +129,7 @@ void SGF_internal_init_RU(SGF_Sgf *sgf, MrvVector *tokens)
 	}
 }
 
+// TODO err handling?
 void SGF_internal_init_single_value_str_property(MrvVector *tokens,
 						 enum SGF_Property property,
 						 char **dest)

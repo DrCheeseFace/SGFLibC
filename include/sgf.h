@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
-enum SGF_Player { SGF_PLAYER_BLACK, SGF_PLAYER_WHITE };
+enum SGF_Player { SGF_PLAYER_BLACK, SGF_PLAYER_WHITE, SGF_PLAYER_COUNT };
 
 enum SGF_Ruleset {
 	SGF_RULESET_NONE = 0,
@@ -37,8 +37,9 @@ struct SGF_Location {
 struct SGF_Move {
 	enum SGF_Player player;
 	struct SGF_Location loc;
-	struct SGF_Move **variations;
 	uint8_t variations_len;
+	struct SGF_Move **variations;
+	char *comment;
 };
 
 enum SGF_Property {

@@ -28,7 +28,7 @@ MRT_TEST_GROUP(test_sanity_check)
 MRT_TEST_GROUP(test_tokenizer_basic_syntax)
 {
 	const char *basic_sgf = "(;SZ[19])";
-	MrvVector *tokens = SGF_internal_tokeize(basic_sgf);
+	SGF_Tokens tokens = SGF_internal_tokeize(basic_sgf);
 
 	MRT_ASSERT(tokens != NULL, "tokenizer allocation");
 	MRT_ASSERT(tokens->len == 5, "basic token count");
@@ -45,7 +45,7 @@ MRT_TEST_GROUP(test_tokenizer_basic_syntax)
 MRT_TEST_GROUP(test_tokenizer_escaped_chars)
 {
 	const char *escape_sgf = "(;C[Escaped \\] and backslash \\\\ test])";
-	MrvVector *tokens = SGF_internal_tokeize(escape_sgf);
+	SGF_Tokens tokens = SGF_internal_tokeize(escape_sgf);
 
 	MRT_ASSERT(tokens != NULL, "tokenizer escape support");
 	MRT_ASSERT(tokens->len == 5, "escaped token count");
@@ -57,7 +57,7 @@ MRT_TEST_GROUP(test_tokenizer_escaped_chars)
 MRT_TEST_GROUP(test_tokenizer_multi_value)
 {
 	const char *multi_sgf = "(;AB[aa][bb][cc])";
-	MrvVector *tokens = SGF_internal_tokeize(multi_sgf);
+	SGF_Tokens tokens = SGF_internal_tokeize(multi_sgf);
 
 	MRT_ASSERT(tokens != NULL, "tokenizer multi value support");
 	MRT_ASSERT(tokens->len == 7, "multi token count");
@@ -71,7 +71,7 @@ MRT_TEST_GROUP(test_tokenizer_multi_value)
 MRT_TEST_GROUP(test_tokenizer_nested_variations)
 {
 	const char *nested_sgf = "(;B[pd](;W[dp])(;W[pp]))";
-	MrvVector *tokens = SGF_internal_tokeize(nested_sgf);
+	SGF_Tokens tokens = SGF_internal_tokeize(nested_sgf);
 
 	MRT_ASSERT(tokens != NULL, "tokenizer nesting support");
 	// ( ; B [pd] ( ; W [dp] ) ( ; W [pp] ) )
@@ -104,15 +104,15 @@ MRT_TEST_GROUP(test_get_property_tokens)
 {
 	const char *sgf =
 		"PW[whiteplayername]PB[blackplayername]AB[pd][dp][pp](;W[dd]";
-	MrvVector *tokens = SGF_internal_tokeize(sgf);
+	SGF_Tokens tokens = SGF_internal_tokeize(sgf);
 
-	MrvVector *PW_tokens =
+	SGF_Tokens PW_tokens =
 		SGF_internal_get_property_tokens(tokens, SGF_PROPERTIES_PW);
 	ASSERT_TOKEN(PW_tokens, 0, SGF_TOKEN_VALUE, "whiteplayername");
 	MRT_ASSERT(PW_tokens->len == 1, "PW property tokens length");
 	SGF_internal_tokens_destroy(PW_tokens);
 
-	MrvVector *AB_tokens =
+	SGF_Tokens AB_tokens =
 		SGF_internal_get_property_tokens(tokens, SGF_PROPERTIES_AB);
 	ASSERT_TOKEN(AB_tokens, 0, SGF_TOKEN_VALUE, "pd");
 	ASSERT_TOKEN(AB_tokens, 1, SGF_TOKEN_VALUE, "dp");
@@ -129,7 +129,7 @@ MRT_TEST_GROUP(test_init_AW_AB_locations)
 	uint8_t len = 0;
 	const char *sgf_str =
 		"PW[whiteplayername]PB[blackplayername]AB[aa][ab][cd](;W[dd]";
-	MrvVector *tokens = SGF_internal_tokeize(sgf_str);
+	SGF_Tokens tokens = SGF_internal_tokeize(sgf_str);
 
 	SGF_internal_init_locations_by_property(tokens, SGF_PROPERTIES_AW,
 						&locations, &len);
@@ -177,7 +177,7 @@ MRT_TEST_GROUP(test_init_RU)
 {
 	enum SGF_Ruleset out_ruleset;
 	const char *sgf_str = "SZ[19]HA[3]RU[Japanese]KM[6.50]";
-	MrvVector *tokens = SGF_internal_tokeize(sgf_str);
+	SGF_Tokens tokens = SGF_internal_tokeize(sgf_str);
 
 	SGF_internal_init_RU(tokens, &out_ruleset);
 	MRT_ASSERT(out_ruleset == SGF_RULESET_JAPANESE,
@@ -214,7 +214,7 @@ MRT_TEST_GROUP(test_init_single_value_str_property)
 {
 	char *out_val = NULL;
 	const char *sgf_str = "(;GM[1]FF[4]CA[UTF-8]AP[CGoban:3]ST[2]";
-	MrvVector *tokens = SGF_internal_tokeize(sgf_str);
+	SGF_Tokens tokens = SGF_internal_tokeize(sgf_str);
 
 	SGF_internal_init_single_value_str_property(tokens, SGF_PROPERTIES_AP,
 						    &out_val);

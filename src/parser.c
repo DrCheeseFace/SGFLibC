@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-MrvVector *SGF_internal_get_property_tokens(MrvVector *tokens,
+SGF_Tokens SGF_internal_get_property_tokens(SGF_Tokens tokens,
 					    enum SGF_Property property)
 {
 	int property_token_index = NOT_FOUND;
@@ -25,7 +25,7 @@ MrvVector *SGF_internal_get_property_tokens(MrvVector *tokens,
 		return NULL;
 	}
 
-	MrvVector *property_tokens = mrv_create(8, sizeof(SGF_Token));
+	SGF_Tokens property_tokens = mrv_create(8, sizeof(SGF_Token));
 	for (uint i = property_token_index + 1; i < tokens->len; i++) {
 		SGF_Token *token = mrv_get_idx(tokens, i);
 		if (token->type == SGF_TOKEN_PAREN_OPEN ||
@@ -52,10 +52,10 @@ void SGF_internal_init_location(SGF_Token location_token,
 }
 
 void SGF_internal_init_locations_by_property(
-	MrvVector *tokens, enum SGF_Property property,
+	SGF_Tokens tokens, enum SGF_Property property,
 	struct SGF_Location **dest_locations, uint8_t *dest_len)
 {
-	MrvVector *prop_tokens =
+	SGF_Tokens prop_tokens =
 		SGF_internal_get_property_tokens(tokens, property);
 	if (prop_tokens != NULL) {
 		// TODO null check
@@ -75,11 +75,11 @@ void SGF_internal_init_locations_by_property(
 	}
 }
 
-void SGF_internal_init_RU(MrvVector *tokens, enum SGF_Ruleset *dest)
+void SGF_internal_init_RU(SGF_Tokens tokens, enum SGF_Ruleset *dest)
 {
 	*dest = SGF_RULESET_NONE;
 
-	MrvVector *RU_property_tokens =
+	SGF_Tokens RU_property_tokens =
 		SGF_internal_get_property_tokens(tokens, SGF_PROPERTIES_RU);
 
 	if (RU_property_tokens != NULL) {
@@ -106,11 +106,11 @@ void SGF_internal_init_RU(MrvVector *tokens, enum SGF_Ruleset *dest)
 }
 
 // TODO err handling?
-void SGF_internal_init_single_value_str_property(MrvVector *tokens,
+void SGF_internal_init_single_value_str_property(SGF_Tokens tokens,
 						 enum SGF_Property property,
 						 char **dest)
 {
-	MrvVector *property_tokens =
+	SGF_Tokens property_tokens =
 		SGF_internal_get_property_tokens(tokens, property);
 	if (property_tokens != NULL) {
 		if (property_tokens->len != 1) {
@@ -125,4 +125,15 @@ void SGF_internal_init_single_value_str_property(MrvVector *tokens,
 
 		SGF_internal_tokens_destroy(property_tokens);
 	}
+}
+
+// figure that one out sports fans
+void SGF_internal_init_variations(SGF_Tokens tokens,
+				  struct SGF_Move ***variations,
+				  uint8_t *variations_len)
+{
+	ignore tokens;
+	ignore variations;
+	ignore variations_len;
+	// TODO
 }

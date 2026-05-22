@@ -35,7 +35,7 @@ SGF_Sgf *SGF_read(unused FILE *file)
 		fread(buffer, 1, length, file);
 	}
 
-	MrvVector *tokens = SGF_internal_tokeize(buffer);
+	SGF_Tokens tokens = SGF_internal_tokeize(buffer);
 	free(buffer);
 
 	SGF_internal_init_locations_by_property(tokens, SGF_PROPERTIES_AW,
@@ -44,10 +44,22 @@ SGF_Sgf *SGF_read(unused FILE *file)
 						&sgf->AB, &sgf->AB_len);
 
 	SGF_internal_init_RU(tokens, &sgf->RU);
+
 	SGF_internal_init_single_value_str_property(tokens, SGF_PROPERTIES_AP,
 						    &sgf->AP);
 	SGF_internal_init_single_value_str_property(tokens, SGF_PROPERTIES_AP,
 						    &sgf->AP);
+
+	SGF_internal_init_single_value_str_property(tokens, SGF_PROPERTIES_PW,
+						    &sgf->PW);
+	SGF_internal_init_single_value_str_property(tokens, SGF_PROPERTIES_PB,
+						    &sgf->PB);
+
+	SGF_internal_init_single_value_str_property(tokens, SGF_PROPERTIES_WR,
+						    &sgf->WR);
+	SGF_internal_init_single_value_str_property(tokens, SGF_PROPERTIES_BR,
+						    &sgf->BR);
+	sgf->GM = 1; // assuming only GO
 
 	SGF_internal_tokens_destroy(tokens);
 	return sgf;

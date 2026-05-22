@@ -5,12 +5,12 @@
 #include <internal_tokenizer.h>
 #include <mr_utils.h>
 
-MrvVector *SGF_internal_tokeize(const char *input)
+SGF_Tokens SGF_internal_tokeize(const char *input)
 {
 	if (input == NULL)
 		return NULL;
 
-	MrvVector *tokens = mrv_create(32, sizeof(SGF_Token));
+	SGF_Tokens tokens = mrv_create(32, sizeof(SGF_Token));
 	const char *p = input;
 
 	while (*p != '\0') {
@@ -58,7 +58,7 @@ MrvVector *SGF_internal_tokeize(const char *input)
 	return tokens;
 }
 
-void SGF_internal_tokens_destroy(MrvVector *tokens)
+void SGF_internal_tokens_destroy(SGF_Tokens tokens)
 {
 	if (tokens == NULL)
 		return;

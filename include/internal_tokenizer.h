@@ -19,12 +19,11 @@ typedef struct {
 	char *text;
 } SGF_Token;
 
+typedef MrvVector *SGF_Tokens;
 // destroy using SGF_internal_tokens_destroy()
-// returns MrvVector of SGF_Token
-MrvVector *SGF_internal_tokeize(const char *input);
-void SGF_internal_tokens_destroy(MrvVector *tokens);
+SGF_Tokens SGF_internal_tokeize(const char *input);
+void SGF_internal_tokens_destroy(SGF_Tokens tokens);
 void SGF_internal_token_init(SGF_Token *token, SGF_TokenType type,
-			    const char *text, size_t text_len);
-
+			     const char *text, size_t text_len);
 
 #endif

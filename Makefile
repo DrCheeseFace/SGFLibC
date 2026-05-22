@@ -2,7 +2,7 @@ CC          = gcc
 CSTANDARD   = c99
 
 INCLUDES    = -Iinclude -Isrc/mr_utils/include
-LDLIBS      = -Lsrc/mr_utils/build/$(BUILD_TYPE) -lmr_utils -lm
+LDLIBS      = -lm
 # LDLIBS      += -lasan
 
 WARNINGS  = -Wall -Wextra -Werror -Wpedantic -pedantic-errors
@@ -14,11 +14,15 @@ WARNINGS += -Wshadow -Wfloat-equal -Wformat=2
 WARNINGS += -Wredundant-decls -Wnested-externs
 # WARNINGS += -fsanitize=address
 
+BUILD_TYPE ?= release
+
 ifneq (,$(filter debug build-debug,$(MAKECMDGOALS)))
     BUILD_TYPE := debug
-    CFLAGS     := -O0 -g -fno-omit-frame-pointer -rdynamic -DDEBUG -DMRD_DEBUG_DEFAULT $(WARNINGS) $(INCLUDES)
+endif
+
+ifeq ($(BUILD_TYPE),debug)
+    CFLAGS     := -O0 -g -fno-omit-frame-pointer -rdynamic -DDEBUG -DMRD_DEBUG_BACKTRACE $(WARNINGS) $(INCLUDES)
 else
-    BUILD_TYPE := release
     CFLAGS     := -O2 $(WARNINGS) $(INCLUDES)
 endif
 
@@ -26,26 +30,36 @@ BUILD_DIR := build
 OBJ_DIR   := $(BUILD_DIR)/$(BUILD_TYPE)
 
 TARGET_TEST    = $(OBJ_DIR)/test.out
-UTILS_SPACERS  = src/mr_utils/build/$(BUILD_TYPE)/spacers
+TARGET_SPACERS = $(OBJ_DIR)/spacers
 
 SRC_LIB        = src/sgf.c src/tokenizer.c src/parser.c
 SRC_TEST_MAIN  = test/test.c
 
+SRC_MR_UTILS   = src/mr_utils/src/mrd_debug.c \
+                 src/mr_utils/src/mrl_logger.c \
+                 src/mr_utils/src/mrs_strings.c \
+                 src/mr_utils/src/mrt_test.c \
+                 src/mr_utils/src/mrv_vectors.c
+
+SRC_SPACERS    = src/mr_utils/tools/spacers.c
+
 OBJ_LIB        = $(SRC_LIB:%.c=$(OBJ_DIR)/%.o)
 OBJ_TEST_MAIN  = $(SRC_TEST_MAIN:%.c=$(OBJ_DIR)/%.o)
+OBJ_MR_UTILS   = $(SRC_MR_UTILS:%.c=$(OBJ_DIR)/%.o)
+OBJ_SPACERS    = $(SRC_SPACERS:%.c=$(OBJ_DIR)/%.o)
 
-ALL_MAIN_OBJS   = $(OBJ_LIB)
-ALL_TEST_OBJS  = $(OBJ_LIB) $(OBJ_TEST_MAIN)
+ALL_TEST_OBJS    = $(OBJ_LIB) $(OBJ_TEST_MAIN) $(OBJ_MR_UTILS)
+ALL_SPACERS_OBJS = $(OBJ_MR_UTILS) $(OBJ_SPACERS)
 
-.PHONY: all test run clean format format-check bear debug build-debug mr_utils_lib
+.PHONY: all test run clean format format-check bear debug build-debug spacers
 
-all: $(TARGET_TEST)
+all: $(TARGET_TEST) $(TARGET_SPACERS)
 
-mr_utils_lib:
-	$(MAKE) -C src/mr_utils static-lib spacers BUILD_TYPE=$(BUILD_TYPE)
-
-$(TARGET_TEST): mr_utils_lib $(ALL_TEST_OBJS)
+$(TARGET_TEST): $(ALL_TEST_OBJS)
 	$(CC) $(ALL_TEST_OBJS) -o $@ $(LDLIBS)
+
+$(TARGET_SPACERS): $(ALL_SPACERS_OBJS)
+	$(CC) $(ALL_SPACERS_OBJS) -o $@ $(LDLIBS)
 
 $(OBJ_DIR)/%.o: %.c
 	@mkdir -p $(dir $@)
@@ -54,7 +68,7 @@ $(OBJ_DIR)/%.o: %.c
 test: $(TARGET_TEST)
 	./$(TARGET_TEST)
 
-build-debug: $(TARGET_TEST)
+build-debug: $(TARGET_TEST) $(TARGET_SPACERS)
 
 debug: build-debug
 	./$(TARGET_TEST)
@@ -62,18 +76,19 @@ debug: build-debug
 clean:
 	rm -rf $(BUILD_DIR)
 	rm -f compile_commands.json
-	$(MAKE) -C src/mr_utils clean
 
 bear: clean
 	bear -- make build-debug
 
-format: mr_utils_lib
-	find ./src ./test -name "*.c" -o -name "*.h" | xargs clang-format -i --verbose
-	git ls-files --recurse-submodules | xargs $(UTILS_SPACERS)
+spacers: $(TARGET_SPACERS)
 
-format-check: mr_utils_lib
+format: $(TARGET_SPACERS)
+	find ./src ./test -name "*.c" -o -name "*.h" | xargs clang-format -i --verbose
+	git ls-files --recurse-submodules | xargs $(TARGET_SPACERS)
+
+format-check: $(TARGET_SPACERS)
 	find ./src ./test -name "*.c" -o -name "*.h" | xargs clang-format --dry-run --Werror --verbose
-	git ls-files --recurse-submodules | xargs $(UTILS_SPACERS)
+	git ls-files --recurse-submodules | xargs $(TARGET_SPACERS)
 
 valgrind:
 	valgrind --leak-check=full --suppressions=valgrind.supp $(TARGET_TEST)
@@ -82,5 +97,5 @@ record:
 	perf record -g --call-graph dwarf $(TARGET_TEST)
 	perf script > chombo.perf
 
--include $(ALL_MAIN_OBJS:.o=.d)
 -include $(ALL_TEST_OBJS:.o=.d)
+-include $(OBJ_SPACERS:.o=.d)

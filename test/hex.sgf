@@ -1,0 +1,10 @@
+(;AP[HexGui:0.10.GIT]FF[4]GM[11]SZ[7]C[Example game]
+ ;B[c5]C[This opening is too strong. White will definitely swap it.]
+ ;W[swap-pieces];B[c4];W[c5];B[a6];W[c6]C[Good.]
+ ;B[a7];W[b5];B[a5];W[b3]
+ (;B[d2]C[See the next variation for what happens if Black plays b4.]
+  ;W[b4];B[d4];W[e5];B[resign];)
+ (;B[b4];W[d2]
+  ;AB[a2][b2][c1][d1][d4][d5][e1][e5][f1][f5][g5]
+  C[Note that White is connected by templates, requiring only the area shown.])
+)

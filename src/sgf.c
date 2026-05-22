@@ -15,7 +15,8 @@ const char *SGF_property_key[SGF_PROPERTIES_COUNT] = {
 const char *SGF_ruleset_key[SGF_RULESET_COUNT] = { "None", "Chinese",
 						   "Japanese" };
 
-SGF_Sgf *SGF_read(unused FILE *file)
+SGF_Sgf *
+SGF_read(unused FILE *file)
 {
 	if (!file) {
 		return NULL;
@@ -65,7 +66,8 @@ SGF_Sgf *SGF_read(unused FILE *file)
 	return sgf;
 }
 
-void SGF_destroy(SGF_Sgf *sgf)
+void
+SGF_destroy(SGF_Sgf *sgf)
 {
 	if (sgf->AB) {
 		free(sgf->AB);

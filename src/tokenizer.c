@@ -5,7 +5,8 @@
 #include <internal_tokenizer.h>
 #include <mr_utils.h>
 
-SGF_Tokens SGF_internal_tokeize(const char *input)
+SGF_Tokens
+SGF_internal_tokeize(const char *input)
 {
 	if (input == NULL)
 		return NULL;
@@ -58,28 +59,52 @@ SGF_Tokens SGF_internal_tokeize(const char *input)
 	return tokens;
 }
 
-void SGF_internal_tokens_destroy(SGF_Tokens tokens)
+void
+SGF_internal_tokens_destroy(SGF_Tokens tokens)
 {
 	if (tokens == NULL)
 		return;
 
 	for (size_t i = 0; i < tokens->len; i++) {
 		SGF_Token *token = mrv_get_idx(tokens, i);
-		if (token->text) {
-			free(token->text);
-		}
+		SGF_internal_token_free(token);
 	}
 
 	mrv_destroy(tokens);
 }
 
-void SGF_internal_token_init(SGF_Token *token, SGF_TokenType type,
-			     const char *text, size_t text_len)
+SGF_Tokens
+SGF_internal_tokens_dupe(SGF_Tokens tokens)
+{
+	SGF_Tokens duped = mrv_create(8, sizeof(SGF_Token));
+
+	for (uint i = 0; i < tokens->len; i++) {
+		SGF_Token *token = mrv_get_idx(tokens, i);
+		SGF_Token t;
+		SGF_internal_token_init(&t, token->type, token->text,
+					strlen(token->text));
+		mrv_append(duped, &t, APPEND_SCALING_INCREMENT);
+	}
+
+	return duped;
+}
+
+void
+SGF_internal_token_init(SGF_Token *token, SGF_TokenType type, const char *text,
+			size_t text_len)
 {
 	token->type = type;
 	token->text = malloc(text_len + 1);
 	if (token->text) {
 		strncpy(token->text, text, text_len);
 		token->text[text_len] = '\0';
+	}
+}
+
+void
+SGF_internal_token_free(SGF_Token *token)
+{
+	if (token->text) {
+		free(token->text);
 	}
 }

@@ -5,8 +5,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-SGF_Tokens SGF_internal_get_property_tokens(SGF_Tokens tokens,
-					    enum SGF_Property property)
+SGF_Tokens
+SGF_internal_get_property_tokens(SGF_Tokens tokens, enum SGF_Property property)
 {
 	int property_token_index = NOT_FOUND;
 
@@ -43,17 +43,19 @@ SGF_Tokens SGF_internal_get_property_tokens(SGF_Tokens tokens,
 	return property_tokens;
 }
 
-void SGF_internal_init_location(SGF_Token location_token,
-				struct SGF_Location *dest)
+void
+SGF_internal_init_location(SGF_Token location_token, struct SGF_Location *dest)
 {
 	// char 'a' = 97
 	dest->col = location_token.text[0] - 96;
 	dest->row = location_token.text[1] - 96;
 }
 
-void SGF_internal_init_locations_by_property(
-	SGF_Tokens tokens, enum SGF_Property property,
-	struct SGF_Location **dest_locations, uint8_t *dest_len)
+void
+SGF_internal_init_locations_by_property(SGF_Tokens tokens,
+					enum SGF_Property property,
+					struct SGF_Location **dest_locations,
+					uint8_t *dest_len)
 {
 	SGF_Tokens prop_tokens =
 		SGF_internal_get_property_tokens(tokens, property);
@@ -75,7 +77,8 @@ void SGF_internal_init_locations_by_property(
 	}
 }
 
-void SGF_internal_init_RU(SGF_Tokens tokens, enum SGF_Ruleset *dest)
+void
+SGF_internal_init_RU(SGF_Tokens tokens, enum SGF_Ruleset *dest)
 {
 	*dest = SGF_RULESET_NONE;
 
@@ -106,9 +109,10 @@ void SGF_internal_init_RU(SGF_Tokens tokens, enum SGF_Ruleset *dest)
 }
 
 // TODO err handling?
-void SGF_internal_init_single_value_str_property(SGF_Tokens tokens,
-						 enum SGF_Property property,
-						 char **dest)
+void
+SGF_internal_init_single_value_str_property(SGF_Tokens tokens,
+					    enum SGF_Property property,
+					    char **dest)
 {
 	SGF_Tokens property_tokens =
 		SGF_internal_get_property_tokens(tokens, property);
@@ -127,13 +131,45 @@ void SGF_internal_init_single_value_str_property(SGF_Tokens tokens,
 	}
 }
 
-// figure that one out sports fans
-void SGF_internal_init_variations(SGF_Tokens tokens,
-				  struct SGF_Move ***variations,
-				  uint8_t *variations_len)
+mr_internal void
+SGF_internal_tokens_trim_setup_node(SGF_Tokens tokens)
 {
-	ignore tokens;
+	SGF_internal_token_free((void *)tokens->arr);
+	mrv_pop_front(tokens); // removed '(' token
+
+	SGF_internal_token_free((void *)tokens->arr);
+	mrv_pop_front(tokens); // removed ';' token
+
+	SGF_Token *token = mrv_get_last(tokens);
+	SGF_internal_token_free(token);
+	mrv_pop(tokens); // remove ending ')'
+
+	for (;;) {
+		token = mrv_get_idx(tokens, 0);
+		if (token->type == SGF_TOKEN_SEMICOLON) {
+			break;
+		}
+
+		SGF_internal_token_free(token);
+		if (mrv_pop_front(tokens)) {
+			break;
+		}
+	}
+
+	return;
+}
+
+// figure that one out sports fans
+void
+SGF_internal_init_variations(SGF_Tokens tokens, struct SGF_Move ***variations,
+			     uint8_t *variations_len)
+{
+	SGF_Tokens trimed_tokens = SGF_internal_tokens_dupe(tokens);
+	SGF_internal_tokens_trim_setup_node(trimed_tokens);
+
 	ignore variations;
 	ignore variations_len;
+
+	SGF_internal_tokens_destroy(trimed_tokens);
 	// TODO
 }

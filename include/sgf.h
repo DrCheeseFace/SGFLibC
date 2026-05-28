@@ -4,7 +4,13 @@
 #include <stdint.h>
 #include <stdio.h>
 
-enum SGF_Player { SGF_PLAYER_BLACK, SGF_PLAYER_WHITE, SGF_PLAYER_COUNT };
+enum SGF_Player {
+	SGF_PLAYER_BLACK,
+	SGF_PLAYER_WHITE,
+	SGF_PLAYER_NONE,
+	SGF_PLAYER_COUNT
+};
+extern const char *SGF_player_key[SGF_PLAYER_COUNT];
 
 enum SGF_Ruleset {
 	SGF_RULESET_NONE = 0,
@@ -24,7 +30,7 @@ typedef struct {
 
 	enum SGF_ResultTag tag;
 	union {
-		uint8_t Score;
+		uint16_t Score;
 		char Resignation;
 	} score;
 } SGF_Result;
@@ -37,8 +43,9 @@ struct SGF_Location {
 struct SGF_Move {
 	enum SGF_Player player;
 	struct SGF_Location loc;
-	uint8_t variations_len;
+	uint16_t variations_len;
 	struct SGF_Move **variations;
+        struct SGF_Move *prev;
 	char *comment;
 };
 
@@ -93,7 +100,7 @@ typedef struct {
 
 	// variations
 	struct SGF_Move **variations;
-	uint8_t variations_len;
+	uint16_t variations_len;
 
 	// Black Rank: rank of the Black player.
 	char *BR;
@@ -141,9 +148,9 @@ typedef struct {
 	// Rules: ruleset
 	enum SGF_Ruleset RU; // TODO maybe can just be char*?
 	// Number of initial Black stones
-	uint8_t AB_len;
+	uint16_t AB_len;
 	// Number of initial White stones
-	uint8_t AW_len;
+	uint16_t AW_len;
 	// Game: type of game represented by this SGF file. A property value of 1 refers to Go.
 	uint8_t GM; // need this?
 	// Handicap: the number of handicap stones given to Black.

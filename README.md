@@ -1,5 +1,6 @@
 # sgflibc
 [SGF](https://en.wikipedia.org/wiki/Smart_Game_Format) Library
+reading location handle both "a1" and "aa"
 
 <!-- enum SGF_Property { -->
 <!-- 	SGF_PROPERTIES_W, // white move -->

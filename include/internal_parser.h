@@ -1,10 +1,11 @@
-
 #ifndef INTERNAL_PARSER_H
 #define INTERNAL_PARSER_H
 
 #include <internal_tokenizer.h>
 #include <mr_utils.h>
 #include <sgf.h>
+
+#define SGF_COMMENT_PROPERTY_KEY "C"
 
 SGF_Tokens SGF_internal_get_property_tokens(SGF_Tokens tokens,
 					    enum SGF_Property property);
@@ -15,7 +16,7 @@ void SGF_internal_init_location(SGF_Token location_token,
 // property expects either SGF_PROPERTIES_AB OR SGF_PROPERTIES_AW
 void SGF_internal_init_locations_by_property(
 	MrvVector *tokens, enum SGF_Property property,
-	struct SGF_Location **dest_locations, uint8_t *dest_len);
+	struct SGF_Location **dest_locations, uint16_t *dest_len);
 
 void SGF_internal_init_RU(SGF_Tokens tokens, enum SGF_Ruleset *dest);
 void SGF_internal_init_single_value_str_property(SGF_Tokens tokens,
@@ -23,6 +24,8 @@ void SGF_internal_init_single_value_str_property(SGF_Tokens tokens,
 						 char **dest);
 void SGF_internal_init_variations(SGF_Tokens tokens,
 				  struct SGF_Move ***variations,
-				  uint8_t *variations_len);
+				  uint16_t *variations_len);
+void
+SGF_internal_free_move_tree(struct SGF_Move *move);
 
 #endif

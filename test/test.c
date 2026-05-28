@@ -7,6 +7,18 @@
 #include <mr_utils/mrt_test.h>
 #include <sgf.h>
 
+mr_global const char *EXAMPLE_SGF =
+	"(;AP[HexGui:0.10.GIT]FF[4]GM[11]SZ[7]C[Example game]"
+	" ;B[aa]C[This opening is too strong. White will definitely swap it.]"
+	" ;W[bb];B[cc];W[dd];B[ee];W[ff]C[Good.]"
+	" ;B[gg];W[hh];B[ii];W[jj]"
+	" (;B[ab]C[See the next variation for what happens if Black plays b4.]"
+	"  ;W[ac];B[ad];W[ae];B[resign];)"
+	" (;B[af];W[ag]"
+	"  ;AB[ba][be][bf][bg][bh][fh][jk][lk][da][ce][fe]"
+	"  C[Note that White is connected by templates, requiring only the area shown.])"
+	")";
+
 #define ASSERT_TOKEN(vec, idx, expected_type, expected_text)                   \
 	do {                                                                   \
 		SGF_Token *_t = (SGF_Token *)mrv_get_idx((vec), (idx));        \
@@ -126,7 +138,7 @@ MRT_TEST_GROUP(test_get_property_tokens)
 MRT_TEST_GROUP(test_init_AW_AB_locations)
 {
 	struct SGF_Location *locations = NULL;
-	uint8_t len = 0;
+	uint16_t len = 0;
 	const char *sgf_str =
 		"PW[whiteplayername]PB[blackplayername]AB[aa][ab][cd](;W[dd]";
 	SGF_Tokens tokens = SGF_internal_tokeize(sgf_str);
@@ -236,7 +248,102 @@ MRT_TEST_GROUP(test_init_single_value_str_property)
 	SGF_internal_tokens_destroy(tokens);
 }
 
-int main(void)
+MRT_TEST_GROUP(test_move_tree_parsing)
+{
+	SGF_Tokens tokens = SGF_internal_tokeize(EXAMPLE_SGF);
+	struct SGF_Move **variations = NULL;
+	uint16_t variations_len = 0;
+
+	SGF_internal_init_variations(tokens, &variations, &variations_len);
+	MRT_ASSERT(variations != NULL, "variations array allocated");
+	MRT_ASSERT(
+		variations_len == 1,
+		"root setup node transitions to exactly one game track path");
+
+	struct SGF_Move *move_1 = variations[0];
+	MRT_ASSERT(move_1 != NULL, "first move exists");
+
+	MRT_ASSERT(move_1->prev == NULL, "root move prev pointer is null");
+
+	MRT_ASSERT(move_1->player == SGF_PLAYER_BLACK,
+		   "move 1 player is black");
+	MRT_ASSERT(move_1->loc.col == 1 && move_1->loc.row == 1,
+		   "move 1 location maps to [aa] -> (1,1)");
+	MRT_ASSERT(move_1->comment != NULL, "move 1 comment string not null");
+	MRT_ASSERT(
+		strcmp(move_1->comment,
+		       "This opening is too strong. White will definitely swap it.") ==
+			0,
+		"move 1 comment string check");
+	MRT_ASSERT(move_1->variations_len == 1, "move 1 continues linearly");
+
+	// skip down across the continuous, linear main branch segment down to move 10 (;W[jj])
+	struct SGF_Move *curr = move_1;
+	for (int i = 0; i < 9; i++) {
+		MRT_ASSERT(curr->variations_len == 1,
+			   "sequence path remains linear");
+
+		struct SGF_Move *next_move = curr->variations[0];
+		MRT_ASSERT(next_move->prev == curr, "check prev node");
+
+		curr = next_move;
+	}
+
+	// verify move 10 (;W[jj]) before branching
+	MRT_ASSERT(curr->player == SGF_PLAYER_WHITE, "move 10 player is white");
+	MRT_ASSERT(curr->loc.col == 10 && curr->loc.row == 10,
+		   "move 10 location maps to [jj] -> (10,10)");
+	MRT_ASSERT(curr->variations_len == 2,
+		   "move 10 correctly forks into two distinct variations");
+	MRT_ASSERT(curr->comment == NULL, "move 10 no comment");
+
+	// branch A check
+	struct SGF_Move *branch_a = curr->variations[0];
+	MRT_ASSERT(branch_a != NULL, "branch A tracking initialized");
+	MRT_ASSERT(branch_a->prev == curr,
+		   "branch A prev pointer points back to move 10");
+	MRT_ASSERT(branch_a->player == SGF_PLAYER_BLACK,
+		   "branch A move 1 player is black");
+	MRT_ASSERT(branch_a->loc.col == 1 && branch_a->loc.row == 2,
+		   "branch A move 1 maps to [ab] -> (1,2)");
+
+	// branch B check
+	struct SGF_Move *branch_b = curr->variations[1];
+	MRT_ASSERT(branch_b != NULL, "branch B tracking initialized");
+	MRT_ASSERT(branch_b->prev == curr,
+		   "branch B prev pointer points back to Move 10");
+	MRT_ASSERT(branch_b->player == SGF_PLAYER_BLACK,
+		   "branch B move 1 player is black");
+	MRT_ASSERT(branch_b->loc.col == 1 && branch_b->loc.row == 6,
+		   "branch B move 1 maps to [af] -> (1,6)");
+
+	for (uint16_t i = 0; i < variations_len; i++) {
+		SGF_internal_free_move_tree(variations[i]);
+	}
+	free(variations);
+	SGF_internal_tokens_destroy(tokens);
+}
+
+MRT_TEST_GROUP(debug_test)
+{
+	SGF_Tokens tokens = SGF_internal_tokeize(EXAMPLE_SGF);
+	struct SGF_Move **variations = NULL;
+	uint16_t variations_len = 0;
+
+	SGF_internal_init_variations(tokens, &variations, &variations_len);
+
+	if (variations) {
+		for (uint16_t i = 0; i < variations_len; i++) {
+			SGF_internal_free_move_tree(variations[i]);
+		}
+		free(variations);
+	}
+
+	SGF_internal_tokens_destroy(tokens);
+}
+
+int
+main(void)
 {
 	MrlLogger *logger = mrl_create(stderr, TRUE, FALSE);
 	MrtContext *ctx = mrt_ctx_create(logger);
@@ -250,6 +357,9 @@ int main(void)
 	MRT_REGISTER_TEST_GROUP(ctx, test_init_AW_AB_locations);
 	MRT_REGISTER_TEST_GROUP(ctx, test_init_RU);
 	MRT_REGISTER_TEST_GROUP(ctx, test_init_single_value_str_property);
+	MRT_REGISTER_TEST_GROUP(ctx, test_move_tree_parsing);
+
+	MRT_REGISTER_TEST_GROUP(ctx, debug_test);
 
 #ifdef DEBUG
 	Err err = mrt_ctx_run(ctx, FALSE);

@@ -14,6 +14,7 @@ const char *SGF_property_key[SGF_PROPERTIES_COUNT] = {
 
 const char *SGF_ruleset_key[SGF_RULESET_COUNT] = { "None", "Chinese",
 						   "Japanese" };
+const char *SGF_player_key[SGF_PLAYER_COUNT] = { "B", "W", "" };
 
 SGF_Sgf *
 SGF_read(unused FILE *file)
@@ -80,6 +81,11 @@ SGF_destroy(SGF_Sgf *sgf)
 	if (sgf->AP) {
 		free(sgf->AP);
 	}
+
+	for (uint16_t i = 0; i < sgf->variations_len; i++) {
+		SGF_internal_free_move_tree(sgf->variations[i]);
+	}
+	free(sgf->variations);
 
 	free(sgf);
 }

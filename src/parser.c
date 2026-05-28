@@ -1,9 +1,14 @@
 #include <mr_utils.h>
 
+#include <internal_parser.h>
 #include <internal_tokenizer.h>
 #include <sgf.h>
 #include <stdlib.h>
 #include <string.h>
+
+mr_internal struct SGF_Move *SGF_internal_parse_node_stream(SGF_Tokens tokens,
+							    size_t *index);
+void SGF_internal_init_prev_link(struct SGF_Move *move);
 
 SGF_Tokens
 SGF_internal_get_property_tokens(SGF_Tokens tokens, enum SGF_Property property)
@@ -46,6 +51,7 @@ SGF_internal_get_property_tokens(SGF_Tokens tokens, enum SGF_Property property)
 void
 SGF_internal_init_location(SGF_Token location_token, struct SGF_Location *dest)
 {
+	// TODO handle numbers here
 	// char 'a' = 97
 	dest->col = location_token.text[0] - 96;
 	dest->row = location_token.text[1] - 96;
@@ -55,7 +61,7 @@ void
 SGF_internal_init_locations_by_property(SGF_Tokens tokens,
 					enum SGF_Property property,
 					struct SGF_Location **dest_locations,
-					uint8_t *dest_len)
+					uint16_t *dest_len)
 {
 	SGF_Tokens prop_tokens =
 		SGF_internal_get_property_tokens(tokens, property);
@@ -162,14 +168,198 @@ SGF_internal_tokens_trim_setup_node(SGF_Tokens tokens)
 // figure that one out sports fans
 void
 SGF_internal_init_variations(SGF_Tokens tokens, struct SGF_Move ***variations,
-			     uint8_t *variations_len)
+			     uint16_t *variations_len)
 {
 	SGF_Tokens trimed_tokens = SGF_internal_tokens_dupe(tokens);
 	SGF_internal_tokens_trim_setup_node(trimed_tokens);
 
-	ignore variations;
-	ignore variations_len;
+	if (trimed_tokens->len == 0) {
+		*variations = NULL;
+		*variations_len = 0;
+		SGF_internal_tokens_destroy(trimed_tokens);
+		return;
+	}
+
+	size_t index = 0;
+	SGF_Token *next = mrv_get_idx(trimed_tokens, index);
+
+	if (next->type == SGF_TOKEN_SEMICOLON) {
+		struct SGF_Move *next_node =
+			SGF_internal_parse_node_stream(trimed_tokens, &index);
+		if (next_node) {
+			*variations = malloc(sizeof(struct SGF_Move *));
+			(*variations)[0] = next_node;
+			*variations_len = 1;
+		}
+	} else if (next->type == SGF_TOKEN_PAREN_OPEN) {
+		size_t cap = 4;
+		*variations = malloc(cap * sizeof(struct SGF_Move *));
+		*variations_len = 0;
+
+		while (index < trimed_tokens->len) {
+			SGF_Token *chk = mrv_get_idx(trimed_tokens, index);
+			if (chk->type != SGF_TOKEN_PAREN_OPEN)
+				break;
+
+			index++;
+			struct SGF_Move *sub_node =
+				SGF_internal_parse_node_stream(trimed_tokens,
+							       &index);
+			if (sub_node) {
+				if (*variations_len >= cap) {
+					cap *= 2;
+					*variations = realloc(
+						*variations,
+						cap * sizeof(struct SGF_Move *));
+				}
+				(*variations)[(*variations_len)++] = sub_node;
+			}
+
+			if (index < trimed_tokens->len) {
+				SGF_Token *close =
+					mrv_get_idx(trimed_tokens, index);
+				if (close->type == SGF_TOKEN_PAREN_CLOSE) {
+					index++;
+				}
+			}
+		}
+	}
+
+	for (uint16_t i = 0; i < *variations_len; i++) {
+		(*variations)[i]->prev = NULL;
+		SGF_internal_init_prev_link((*variations)[i]);
+	}
 
 	SGF_internal_tokens_destroy(trimed_tokens);
-	// TODO
+}
+
+void
+SGF_internal_init_prev_link(struct SGF_Move *move)
+{
+	if (move->variations == NULL) {
+		return;
+	}
+
+	for (uint16_t i = 0; i < move->variations_len; i++) {
+		move->variations[i]->prev = move;
+		SGF_internal_init_prev_link(move->variations[i]);
+	}
+}
+
+void
+SGF_internal_free_move_tree(struct SGF_Move *move)
+{
+	if (!move)
+		return;
+	if (move->comment) {
+		free(move->comment);
+	}
+	if (move->variations) {
+		for (uint16_t i = 0; i < move->variations_len; i++) {
+			SGF_internal_free_move_tree(move->variations[i]);
+		}
+		free(move->variations);
+	}
+	free(move);
+}
+
+mr_internal struct SGF_Move *
+SGF_internal_parse_node_stream(SGF_Tokens tokens, size_t *index)
+{
+	if (*index >= tokens->len)
+		return NULL;
+
+	SGF_Token *tok = mrv_get_idx(tokens, *index);
+	if (tok->type != SGF_TOKEN_SEMICOLON)
+		return NULL;
+
+	(*index)++; // consume ';'
+
+	struct SGF_Move *node = calloc(1, sizeof(struct SGF_Move));
+	node->player = SGF_PLAYER_NONE;
+	node->comment = NULL;
+
+	while (*index < tokens->len) {
+		SGF_Token *prop = mrv_get_idx(tokens, *index);
+		if (prop->type != SGF_TOKEN_PROPERTY)
+			break;
+
+		const char *key = prop->text;
+		(*index)++;
+
+		while (*index < tokens->len) {
+			SGF_Token *val = mrv_get_idx(tokens, *index);
+			if (val->type != SGF_TOKEN_VALUE)
+				break;
+
+			if (strcmp(key, SGF_player_key[SGF_PLAYER_BLACK]) ==
+			    0) {
+				node->player = SGF_PLAYER_BLACK;
+				SGF_internal_init_location(*val, &node->loc);
+			} else if (strcmp(key,
+					  SGF_player_key[SGF_PLAYER_WHITE]) ==
+				   0) {
+				node->player = SGF_PLAYER_WHITE;
+				SGF_internal_init_location(*val, &node->loc);
+			} else if (strcmp(key, SGF_COMMENT_PROPERTY_KEY) == 0) {
+				node->comment = malloc(strlen(val->text) + 1);
+				if (node->comment)
+					strcpy(node->comment, val->text);
+			}
+
+			(*index)++;
+		}
+	}
+
+	if (*index < tokens->len) {
+		SGF_Token *next = mrv_get_idx(tokens, *index);
+
+		if (next->type == SGF_TOKEN_SEMICOLON) {
+			struct SGF_Move *next_node =
+				SGF_internal_parse_node_stream(tokens, index);
+			if (next_node) {
+				node->variations =
+					malloc(sizeof(struct SGF_Move *));
+				node->variations[0] = next_node;
+				node->variations_len = 1;
+			}
+		} else if (next->type == SGF_TOKEN_PAREN_OPEN) {
+			size_t cap = 4;
+			node->variations =
+				malloc(cap * sizeof(struct SGF_Move *));
+
+			while (*index < tokens->len) {
+				SGF_Token *chk = mrv_get_idx(tokens, *index);
+				if (chk->type != SGF_TOKEN_PAREN_OPEN)
+					break;
+
+				(*index)++; // skip '('
+				struct SGF_Move *sub_node =
+					SGF_internal_parse_node_stream(tokens,
+								       index);
+				if (sub_node) {
+					if (node->variations_len >= cap) {
+						cap *= 2;
+						node->variations = realloc(
+							node->variations,
+							cap * sizeof(struct SGF_Move
+									     *));
+					}
+					node->variations[node->variations_len++] =
+						sub_node;
+				}
+
+				if (*index < tokens->len) {
+					SGF_Token *close =
+						mrv_get_idx(tokens, *index);
+					if (close->type ==
+					    SGF_TOKEN_PAREN_CLOSE) {
+						(*index)++;
+					}
+				}
+			}
+		}
+	}
+
+	return node;
 }

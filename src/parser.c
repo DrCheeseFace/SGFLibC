@@ -6,9 +6,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-mr_internal struct SGF_Move *SGF_internal_parse_node_stream(SGF_Tokens tokens,
-							    size_t *index);
-void SGF_internal_init_prev_link(struct SGF_Move *move);
+internal struct SGF_MoveNode *SGF_internal_parse_node_stream(SGF_Tokens tokens,
+							     size_t *index);
+void SGF_internal_init_prev_link(struct SGF_MoveNode *move);
 
 SGF_Tokens
 SGF_internal_get_property_tokens(SGF_Tokens tokens, enum SGF_Property property)
@@ -48,8 +48,8 @@ SGF_internal_get_property_tokens(SGF_Tokens tokens, enum SGF_Property property)
 	return property_tokens;
 }
 
-void
-SGF_internal_init_location(SGF_Token location_token, struct SGF_Location *dest)
+internal void
+SGF_internal_init_location(SGF_Token location_token, struct SGF_Move *dest)
 {
 	// TODO handle numbers here
 	// char 'a' = 97
@@ -60,7 +60,7 @@ SGF_internal_init_location(SGF_Token location_token, struct SGF_Location *dest)
 void
 SGF_internal_init_locations_by_property(SGF_Tokens tokens,
 					enum SGF_Property property,
-					struct SGF_Location **dest_locations,
+					struct SGF_Move **dest_locations,
 					uint16_t *dest_len)
 {
 	SGF_Tokens prop_tokens =
@@ -137,7 +137,7 @@ SGF_internal_init_single_value_str_property(SGF_Tokens tokens,
 	}
 }
 
-mr_internal void
+internal void
 SGF_internal_tokens_trim_setup_node(SGF_Tokens tokens)
 {
 	SGF_internal_token_free((void *)tokens->arr);
@@ -166,8 +166,10 @@ SGF_internal_tokens_trim_setup_node(SGF_Tokens tokens)
 }
 
 // figure that one out sports fans
+// TODO max depth for variations?
 void
-SGF_internal_init_variations(SGF_Tokens tokens, struct SGF_Move ***variations,
+SGF_internal_init_variations(SGF_Tokens tokens,
+			     struct SGF_MoveNode ***variations,
 			     uint16_t *variations_len)
 {
 	SGF_Tokens trimed_tokens = SGF_internal_tokens_dupe(tokens);
@@ -184,16 +186,16 @@ SGF_internal_init_variations(SGF_Tokens tokens, struct SGF_Move ***variations,
 	SGF_Token *next = mrv_get_idx(trimed_tokens, index);
 
 	if (next->type == SGF_TOKEN_SEMICOLON) {
-		struct SGF_Move *next_node =
+		struct SGF_MoveNode *next_node =
 			SGF_internal_parse_node_stream(trimed_tokens, &index);
 		if (next_node) {
-			*variations = malloc(sizeof(struct SGF_Move *));
+			*variations = malloc(sizeof(struct SGF_MoveNode *));
 			(*variations)[0] = next_node;
 			*variations_len = 1;
 		}
 	} else if (next->type == SGF_TOKEN_PAREN_OPEN) {
 		size_t cap = 4;
-		*variations = malloc(cap * sizeof(struct SGF_Move *));
+		*variations = malloc(cap * sizeof(struct SGF_MoveNode *));
 		*variations_len = 0;
 
 		while (index < trimed_tokens->len) {
@@ -202,7 +204,7 @@ SGF_internal_init_variations(SGF_Tokens tokens, struct SGF_Move ***variations,
 				break;
 
 			index++;
-			struct SGF_Move *sub_node =
+			struct SGF_MoveNode *sub_node =
 				SGF_internal_parse_node_stream(trimed_tokens,
 							       &index);
 			if (sub_node) {
@@ -210,7 +212,8 @@ SGF_internal_init_variations(SGF_Tokens tokens, struct SGF_Move ***variations,
 					cap *= 2;
 					*variations = realloc(
 						*variations,
-						cap * sizeof(struct SGF_Move *));
+						cap * sizeof(struct SGF_MoveNode
+								     *));
 				}
 				(*variations)[(*variations_len)++] = sub_node;
 			}
@@ -234,7 +237,7 @@ SGF_internal_init_variations(SGF_Tokens tokens, struct SGF_Move ***variations,
 }
 
 void
-SGF_internal_init_prev_link(struct SGF_Move *move)
+SGF_internal_init_prev_link(struct SGF_MoveNode *move)
 {
 	if (move->variations == NULL) {
 		return;
@@ -247,7 +250,7 @@ SGF_internal_init_prev_link(struct SGF_Move *move)
 }
 
 void
-SGF_internal_free_move_tree(struct SGF_Move *move)
+SGF_internal_free_move_tree(struct SGF_MoveNode *move)
 {
 	if (!move)
 		return;
@@ -263,7 +266,7 @@ SGF_internal_free_move_tree(struct SGF_Move *move)
 	free(move);
 }
 
-mr_internal struct SGF_Move *
+internal struct SGF_MoveNode *
 SGF_internal_parse_node_stream(SGF_Tokens tokens, size_t *index)
 {
 	if (*index >= tokens->len)
@@ -275,8 +278,8 @@ SGF_internal_parse_node_stream(SGF_Tokens tokens, size_t *index)
 
 	(*index)++; // consume ';'
 
-	struct SGF_Move *node = calloc(1, sizeof(struct SGF_Move));
-	node->player = SGF_PLAYER_NONE;
+	struct SGF_MoveNode *node = calloc(1, sizeof(struct SGF_MoveNode));
+	node->move.player = SGF_PLAYER_NONE;
 	node->comment = NULL;
 
 	while (*index < tokens->len) {
@@ -294,13 +297,13 @@ SGF_internal_parse_node_stream(SGF_Tokens tokens, size_t *index)
 
 			if (strcmp(key, SGF_player_key[SGF_PLAYER_BLACK]) ==
 			    0) {
-				node->player = SGF_PLAYER_BLACK;
-				SGF_internal_init_location(*val, &node->loc);
+				node->move.player = SGF_PLAYER_BLACK;
+				SGF_internal_init_location(*val, &node->move);
 			} else if (strcmp(key,
 					  SGF_player_key[SGF_PLAYER_WHITE]) ==
 				   0) {
-				node->player = SGF_PLAYER_WHITE;
-				SGF_internal_init_location(*val, &node->loc);
+				node->move.player = SGF_PLAYER_WHITE;
+				SGF_internal_init_location(*val, &node->move);
 			} else if (strcmp(key, SGF_COMMENT_PROPERTY_KEY) == 0) {
 				node->comment = malloc(strlen(val->text) + 1);
 				if (node->comment)
@@ -315,18 +318,18 @@ SGF_internal_parse_node_stream(SGF_Tokens tokens, size_t *index)
 		SGF_Token *next = mrv_get_idx(tokens, *index);
 
 		if (next->type == SGF_TOKEN_SEMICOLON) {
-			struct SGF_Move *next_node =
+			struct SGF_MoveNode *next_node =
 				SGF_internal_parse_node_stream(tokens, index);
 			if (next_node) {
 				node->variations =
-					malloc(sizeof(struct SGF_Move *));
+					malloc(sizeof(struct SGF_MoveNode *));
 				node->variations[0] = next_node;
 				node->variations_len = 1;
 			}
 		} else if (next->type == SGF_TOKEN_PAREN_OPEN) {
 			size_t cap = 4;
 			node->variations =
-				malloc(cap * sizeof(struct SGF_Move *));
+				malloc(cap * sizeof(struct SGF_MoveNode *));
 
 			while (*index < tokens->len) {
 				SGF_Token *chk = mrv_get_idx(tokens, *index);
@@ -334,7 +337,7 @@ SGF_internal_parse_node_stream(SGF_Tokens tokens, size_t *index)
 					break;
 
 				(*index)++; // skip '('
-				struct SGF_Move *sub_node =
+				struct SGF_MoveNode *sub_node =
 					SGF_internal_parse_node_stream(tokens,
 								       index);
 				if (sub_node) {
@@ -342,7 +345,7 @@ SGF_internal_parse_node_stream(SGF_Tokens tokens, size_t *index)
 						cap *= 2;
 						node->variations = realloc(
 							node->variations,
-							cap * sizeof(struct SGF_Move
+							cap * sizeof(struct SGF_MoveNode
 									     *));
 					}
 					node->variations[node->variations_len++] =

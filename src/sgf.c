@@ -61,6 +61,10 @@ SGF_read(unused FILE *file)
 						    &sgf->WR);
 	SGF_internal_init_single_value_str_property(tokens, SGF_PROPERTIES_BR,
 						    &sgf->BR);
+
+	SGF_internal_init_variations(tokens, &sgf->variations,
+				     &sgf->variations_len);
+
 	sgf->GM = 1; // assuming only GO
 
 	SGF_internal_tokens_destroy(tokens);

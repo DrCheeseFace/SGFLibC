@@ -35,17 +35,17 @@ typedef struct {
 	} score;
 } SGF_Result;
 
-struct SGF_Location {
+struct SGF_Move {
+        enum SGF_Player player;
 	uint8_t col;
 	uint8_t row;
 };
 
-struct SGF_Move {
-	enum SGF_Player player;
-	struct SGF_Location loc;
+struct SGF_MoveNode {
+	struct SGF_Move move;
 	uint16_t variations_len;
-	struct SGF_Move **variations;
-        struct SGF_Move *prev;
+	struct SGF_MoveNode **variations;
+        struct SGF_MoveNode *prev;
 	char *comment;
 };
 
@@ -90,16 +90,16 @@ extern const char *SGF_property_key[SGF_PROPERTIES_COUNT];
 
 typedef struct {
 	// Add Black: locations of Black stones to be placed on the board prior to the first move
-	struct SGF_Location *AB;
+	struct SGF_Move *AB;
 	// Add White: locations of White stones to be placed on the board prior to the first move.
-	struct SGF_Location *AW;
+	struct SGF_Move *AW;
 	// Annotations: name of the person commenting the game.
 	char *AN;
 	// Application: application that was used to create the SGF file
 	char *AP;
 
 	// variations
-	struct SGF_Move **variations;
+	struct SGF_MoveNode **variations;
 	uint16_t variations_len;
 
 	// Black Rank: rank of the Black player.
@@ -136,11 +136,11 @@ typedef struct {
 	char *WR;
 	// White Team: name of the White team.
 	char *WT;
+        // Komi: komi.
+        char* KM; // TODO struct to hold other stuffs?
 
 	// Result: result, usually in the format "B+R" or "B+3.5".
 	SGF_Result RE;
-	// Komi: komi.
-	float KM;
 	// Time limit: time limit in seconds.
 	uint32_t TM;
 	// Player: color of player to start.

@@ -32,7 +32,7 @@ OBJ_DIR   := $(BUILD_DIR)/$(BUILD_TYPE)
 TARGET_TEST    = $(OBJ_DIR)/test.out
 TARGET_SPACERS = $(OBJ_DIR)/spacers
 
-SRC_LIB        = src/sgf.c src/tokenizer.c src/parser.c
+SRC_LIB        = src/sgf.c src/tokenizer.c src/parser.c src/kifu.c
 SRC_TEST_MAIN  = test/test.c
 
 SRC_MR_UTILS   = src/mr_utils/src/mrd_debug.c \

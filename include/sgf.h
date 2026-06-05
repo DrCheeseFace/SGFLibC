@@ -36,7 +36,7 @@ typedef struct {
 } SGF_Result;
 
 struct SGF_Move {
-        enum SGF_Player player;
+	enum SGF_Player player;
 	uint8_t col;
 	uint8_t row;
 };
@@ -45,7 +45,7 @@ struct SGF_MoveNode {
 	struct SGF_Move move;
 	uint16_t variations_len;
 	struct SGF_MoveNode **variations;
-        struct SGF_MoveNode *prev;
+	struct SGF_MoveNode *prev;
 	char *comment;
 };
 
@@ -136,8 +136,8 @@ typedef struct {
 	char *WR;
 	// White Team: name of the White team.
 	char *WT;
-        // Komi: komi.
-        char* KM; // TODO struct to hold other stuffs?
+	// Komi: komi.
+	float KM;// TODO struct to hold other stuffs?
 
 	// Result: result, usually in the format "B+R" or "B+3.5".
 	SGF_Result RE;

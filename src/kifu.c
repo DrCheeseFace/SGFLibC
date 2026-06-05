@@ -1,11 +1,9 @@
 #include <kifu.h>
 #include <mr_utils.h>
 
-void
-SGF_draw_kifu(SGF_Sgf *sgf, FILE *out)
+struct SGF_Kifu *
+SGF_kifu_create(SGF_Sgf *sgf)
 {
-	// TODO
 	ignore sgf;
-	ignore out;
-	return;
+	return NULL;
 }

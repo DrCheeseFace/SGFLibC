@@ -84,6 +84,23 @@ SGF_internal_init_locations_by_property(SGF_Tokens tokens,
 }
 
 void
+SGF_internal_init_KM(SGF_Tokens tokens, float *dest)
+{
+	SGF_Tokens KM_property_tokens =
+		SGF_internal_get_property_tokens(tokens, SGF_PROPERTIES_KM);
+
+	if (KM_property_tokens->len != 1) {
+		SGF_internal_tokens_destroy(KM_property_tokens);
+		return;
+	}
+
+	SGF_Token *komi_property_token = mrv_get_idx(KM_property_tokens, 0);
+	*dest = strtof(komi_property_token->text, NULL);
+
+	SGF_internal_tokens_destroy(KM_property_tokens);
+}
+
+void
 SGF_internal_init_RU(SGF_Tokens tokens, enum SGF_Ruleset *dest)
 {
 	*dest = SGF_RULESET_NONE;
@@ -157,7 +174,8 @@ SGF_internal_tokens_trim_setup_node(SGF_Tokens tokens)
 		}
 
 		SGF_internal_token_free(token);
-		if (mrv_pop_front(tokens)) {
+		mrv_pop_front(tokens);
+		if (tokens->len == 0) {
 			break;
 		}
 	}

@@ -47,6 +47,8 @@ SGF_read(unused FILE *file)
 
 	SGF_internal_init_RU(tokens, &sgf->RU);
 
+	SGF_internal_init_KM(tokens, &sgf->KM);
+
 	SGF_internal_init_single_value_str_property(tokens, SGF_PROPERTIES_AP,
 						    &sgf->AP);
 	SGF_internal_init_single_value_str_property(tokens, SGF_PROPERTIES_AP,

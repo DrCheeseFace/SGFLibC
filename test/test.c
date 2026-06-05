@@ -1,3 +1,5 @@
+#include <float.h>
+#include <math.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -222,6 +224,26 @@ MRT_TEST_GROUP(test_init_RU)
 	SGF_internal_tokens_destroy(tokens);
 }
 
+MRT_TEST_GROUP(test_init_KM)
+{
+	float out_komi;
+	const char *sgf_str = "SZ[19]HA[3]RU[Japanese]KM[6.50]";
+	SGF_Tokens tokens = SGF_internal_tokeize(sgf_str);
+
+	SGF_internal_init_KM(tokens, &out_komi);
+	MRT_ASSERT(fabsf(out_komi - 6.5f) < FLT_EPSILON, "positive komi");
+
+	SGF_internal_tokens_destroy(tokens);
+
+	sgf_str = "SZ[19]HA[3]RU[Chinese]KM[-6.50]";
+	tokens = SGF_internal_tokeize(sgf_str);
+
+	SGF_internal_init_KM(tokens, &out_komi);
+	MRT_ASSERT(fabsf(out_komi + 6.5f) < FLT_EPSILON, "negative komi");
+
+	SGF_internal_tokens_destroy(tokens);
+}
+
 MRT_TEST_GROUP(test_init_single_value_str_property)
 {
 	char *out_val = NULL;
@@ -357,6 +379,7 @@ main(void)
 	MRT_REGISTER_TEST_GROUP(ctx, test_get_property_tokens);
 	MRT_REGISTER_TEST_GROUP(ctx, test_init_AW_AB_locations);
 	MRT_REGISTER_TEST_GROUP(ctx, test_init_RU);
+	MRT_REGISTER_TEST_GROUP(ctx, test_init_KM);
 	MRT_REGISTER_TEST_GROUP(ctx, test_init_single_value_str_property);
 	MRT_REGISTER_TEST_GROUP(ctx, test_move_tree_parsing);
 

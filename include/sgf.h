@@ -31,13 +31,9 @@ enum SGF_ResultTag {
 };
 
 typedef struct {
+        float score;
 	enum SGF_Player player;
-
 	enum SGF_ResultTag tag;
-	union {
-		float Score;
-		char Resignation;
-	} score;
 } SGF_Result;
 
 struct SGF_Move {

@@ -232,7 +232,6 @@ SGF_internal_init_RE(SGF_Tokens tokens, SGF_Result *dest)
 			switch (reason[0]) {
 			case 'R':
 				dest->tag = SGF_RESULT_TYPE_RESIGNATION;
-				dest->score.Resignation = 1;
 				break;
 			case 'T':
 				dest->tag = SGF_RESULT_TYPE_TIME;
@@ -245,7 +244,7 @@ SGF_internal_init_RE(SGF_Tokens tokens, SGF_Result *dest)
 				break;
 			default:
 				dest->tag = SGF_RESULT_TYPE_SCORE;
-				dest->score.Score = strtof(reason, NULL);
+				dest->score = strtof(reason, NULL);
 				break;
 			}
 		}

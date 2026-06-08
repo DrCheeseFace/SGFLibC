@@ -391,8 +391,6 @@ MRT_TEST_GROUP(test_init_RE)
 		   "RE[B+R] player is Black");
 	MRT_ASSERT(out_result.tag == SGF_RESULT_TYPE_RESIGNATION,
 		   "RE[B+R] is Resignation");
-	MRT_ASSERT(out_result.score.Resignation == 1,
-		   "RE[B+R] resignation flag set");
 	SGF_internal_tokens_destroy(tokens);
 
 	// white Time
@@ -422,8 +420,8 @@ MRT_TEST_GROUP(test_init_RE)
 		   "RE[W+3.5] player is White");
 	MRT_ASSERT(out_result.tag == SGF_RESULT_TYPE_SCORE,
 		   "RE[W+3.5] is Score");
-	MRT_ASSERT(fabsf(out_result.score.Score - 3.5f) < FLT_EPSILON,
-		   "RE[W+3.5] score parsed correctly as float");
+	MRT_ASSERT(fabsf(out_result.score - 3.5f) < FLT_EPSILON,
+		   "RE[W+3.5] score parsed as float");
 	SGF_internal_tokens_destroy(tokens);
 
 	// fallback
@@ -433,7 +431,7 @@ MRT_TEST_GROUP(test_init_RE)
 	MRT_ASSERT(out_result.player == SGF_PLAYER_BLACK,
 		   "RE[B+] player is Black");
 	MRT_ASSERT(out_result.tag == SGF_RESULT_TYPE_UNKNOWN,
-		   "RE[B+] missing reason correctly falls back to unknown tag");
+		   "RE[B+] missing reason fall back to unknown tag");
 	SGF_internal_tokens_destroy(tokens);
 }
 

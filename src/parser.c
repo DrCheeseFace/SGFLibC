@@ -182,7 +182,7 @@ SGF_internal_init_RU(SGF_Tokens tokens, enum SGF_Ruleset *dest)
 }
 
 void
-SGF_internal_init_RE(SGF_Tokens tokens, SGF_Result *dest)
+SGF_internal_init_RE(SGF_Tokens tokens, struct SGF_Result *dest)
 {
 	dest->player = SGF_PLAYER_NONE;
 	dest->type = SGF_RESULT_TYPE_UNKNOWN;

@@ -30,7 +30,7 @@ struct SGF_Kifu {
 	// Komi
 	float KM;
 
-	SGF_Result RE;
+	struct SGF_Result RE;
 	// Time limit
 	uint32_t TM;
 	// Number of initial Black stones

@@ -349,7 +349,7 @@ MRT_TEST_GROUP(test_move_tree_parsing)
 
 MRT_TEST_GROUP(test_init_RE)
 {
-	SGF_Result out_result;
+	struct SGF_Result out_result;
 	const char *sgf_str;
 	SGF_Tokens tokens;
 

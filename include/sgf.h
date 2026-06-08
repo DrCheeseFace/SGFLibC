@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
-enum SGF_Player {
+enum __attribute__((packed)) SGF_Player {
 	SGF_PLAYER_BLACK,
 	SGF_PLAYER_WHITE,
 	SGF_PLAYER_NONE,
@@ -12,7 +12,7 @@ enum SGF_Player {
 };
 extern const char *SGF_player_key[SGF_PLAYER_COUNT];
 
-enum SGF_Ruleset {
+enum __attribute__((packed)) SGF_Ruleset {
 	SGF_RULESET_NONE = 0,
 	SGF_RULESET_CHINESE,
 	SGF_RULESET_JAPANESE,
@@ -20,7 +20,7 @@ enum SGF_Ruleset {
 };
 extern const char *SGF_ruleset_key[SGF_RULESET_COUNT];
 
-enum SGF_ResultType {
+enum __attribute__((packed)) SGF_ResultType {
 	SGF_RESULT_TYPE_RESIGNATION,
 	SGF_RESULT_TYPE_TIME,
 	SGF_RESULT_TYPE_DRAW,
@@ -30,11 +30,11 @@ enum SGF_ResultType {
 	SGF_RESULT_TYPE_SCORE,
 };
 
-typedef struct {
+struct SGF_Result {
 	float score;
 	enum SGF_Player player;
 	enum SGF_ResultType type;
-} SGF_Result;
+};
 
 struct SGF_Move {
 	enum SGF_Player player;
@@ -50,7 +50,7 @@ struct SGF_MoveNode {
 	char *comment;
 };
 
-enum SGF_Property {
+enum __attribute__((packed)) SGF_Property {
 	SGF_PROPERTIES_W, // white move
 	SGF_PROPERTIES_B, // black move
 	SGF_PROPERTIES_AB, // Add Black: locations of Black stones to be placed on the board prior to the first move
@@ -141,7 +141,7 @@ typedef struct {
 	float KM; // TODO struct to hold other stuffs?
 
 	// Result: result, usually in the format "B+R" or "B+3.5".
-	SGF_Result RE;
+	struct SGF_Result RE;
 	// Time limit
 	uint16_t TM;
 	// Player: color of player to start.

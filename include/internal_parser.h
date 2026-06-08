@@ -27,7 +27,7 @@ void SGF_internal_init_single_value_uint8_property(SGF_Tokens tokens,
 void SGF_internal_init_single_value_str_property(SGF_Tokens tokens,
 						 enum SGF_Property property,
 						 char **dest);
-void SGF_internal_init_RE(SGF_Tokens tokens, SGF_Result *dest);
+void SGF_internal_init_RE(SGF_Tokens tokens, struct SGF_Result *dest);
 void SGF_internal_init_variations(SGF_Tokens tokens,
 				  struct SGF_MoveNode ***variations,
 				  uint16_t *variations_len);

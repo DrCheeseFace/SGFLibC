@@ -6,3 +6,4 @@
 
 - [] reading location handle both "a1" and "aa"
 - [] handle other versions. not just FF[4]
+- [] default values ok?

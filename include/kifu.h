@@ -4,8 +4,8 @@
 #include <stdint.h>
 
 struct SGF_Kifu {
-	uint16_t move_count;
 	struct SGF_Move *moves;
+	uint16_t move_count;
 
 	struct SGF_Move *AB;
 	struct SGF_Move *AW;
@@ -30,9 +30,10 @@ struct SGF_Kifu {
 	// Komi
 	float KM;
 
+	// Result
 	struct SGF_Result RE;
 	// Time limit
-	uint32_t TM;
+	uint16_t TM;
 	// Number of initial Black stones
 	uint16_t AB_len;
 	// Number of initial White stones

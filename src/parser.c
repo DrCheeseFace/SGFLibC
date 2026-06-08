@@ -86,6 +86,7 @@ SGF_internal_init_locations_by_property(SGF_Tokens tokens,
 void
 SGF_internal_init_KM(SGF_Tokens tokens, float *dest)
 {
+	*dest = 0;
 	SGF_Tokens KM_property_tokens =
 		SGF_internal_get_property_tokens(tokens, SGF_PROPERTIES_KM);
 
@@ -105,6 +106,8 @@ SGF_internal_init_single_value_uint16_property(SGF_Tokens tokens,
 					       enum SGF_Property property,
 					       uint16_t *dest)
 {
+	*dest = 0;
+
 	SGF_Tokens property_tokens =
 		SGF_internal_get_property_tokens(tokens, property);
 
@@ -130,6 +133,8 @@ SGF_internal_init_single_value_uint8_property(SGF_Tokens tokens,
 					      enum SGF_Property property,
 					      uint8_t *dest)
 {
+	*dest = 0;
+
 	SGF_Tokens property_tokens =
 		SGF_internal_get_property_tokens(tokens, property);
 

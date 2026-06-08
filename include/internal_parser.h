@@ -18,18 +18,15 @@ void SGF_internal_init_locations_by_property(MrvVector *tokens,
 
 // defaults to SGF_RULESET_NONE
 void SGF_internal_init_RU(SGF_Tokens tokens, enum SGF_Ruleset *dest);
-// defaults to zero
-void SGF_internal_init_KM(SGF_Tokens tokens, float *dest);
-// defaults to zero
-void SGF_internal_init_single_value_uint16_property(SGF_Tokens tokens,
+Err SGF_internal_init_KM(SGF_Tokens tokens, float *dest);
+Err SGF_internal_init_single_value_uint16_property(SGF_Tokens tokens,
 						    enum SGF_Property property,
 						    uint16_t *dest);
-// defaults to zero
-void SGF_internal_init_single_value_uint8_property(SGF_Tokens tokens,
+Err SGF_internal_init_single_value_uint8_property(SGF_Tokens tokens,
 						   enum SGF_Property property,
 						   uint8_t *dest);
 // if successful, allocates memory for dest
-void SGF_internal_init_single_value_str_property(SGF_Tokens tokens,
+Err SGF_internal_init_single_value_str_property(SGF_Tokens tokens,
 						 enum SGF_Property property,
 						 char **dest);
 // defaults to

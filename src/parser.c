@@ -83,76 +83,75 @@ SGF_internal_init_locations_by_property(SGF_Tokens tokens,
 	}
 }
 
-void
+Err
 SGF_internal_init_KM(SGF_Tokens tokens, float *dest)
 {
-	*dest = 0;
 	SGF_Tokens KM_property_tokens =
 		SGF_internal_get_property_tokens(tokens, SGF_PROPERTIES_KM);
 
 	if (KM_property_tokens->len != 1) {
 		SGF_internal_tokens_destroy(KM_property_tokens);
-		return;
+		return ERR;
 	}
 
 	SGF_Token *komi_property_token = mrv_get_idx(KM_property_tokens, 0);
 	*dest = strtof(komi_property_token->text, NULL);
 
 	SGF_internal_tokens_destroy(KM_property_tokens);
+	return OK;
 }
 
-void
+Err
 SGF_internal_init_single_value_uint16_property(SGF_Tokens tokens,
 					       enum SGF_Property property,
 					       uint16_t *dest)
 {
-	*dest = 0;
-
 	SGF_Tokens property_tokens =
 		SGF_internal_get_property_tokens(tokens, property);
 
 	if (property_tokens->len != 1) {
 		SGF_internal_tokens_destroy(property_tokens);
-		return;
+		return ERR;
 	}
 
 	SGF_Token *property_token = mrv_get_idx(property_tokens, 0);
 
 	unsigned long raw_value = strtoul(property_token->text, NULL, 10);
 	if (raw_value > UINT16_MAX) {
-		return;
+		return ERR;
 	}
 
 	*dest = (uint16_t)raw_value;
 
 	SGF_internal_tokens_destroy(property_tokens);
+	return OK;
 }
 
-void
+Err
 SGF_internal_init_single_value_uint8_property(SGF_Tokens tokens,
 					      enum SGF_Property property,
 					      uint8_t *dest)
 {
-	*dest = 0;
-
 	SGF_Tokens property_tokens =
 		SGF_internal_get_property_tokens(tokens, property);
 
 	if (property_tokens->len != 1) {
 		SGF_internal_tokens_destroy(property_tokens);
-		return;
+		return ERR;
 	}
 
 	SGF_Token *property_token = mrv_get_idx(property_tokens, 0);
 
 	unsigned long raw_value = strtoul(property_token->text, NULL, 10);
 	if (raw_value > UINT8_MAX) {
-		return;
+		return ERR;
 	}
 
 	*dest = (uint8_t)raw_value;
 
 	SGF_internal_tokens_destroy(property_tokens);
+
+	return OK;
 }
 
 void
@@ -263,27 +262,35 @@ SGF_internal_init_RE(SGF_Tokens tokens, struct SGF_Result *dest)
 	SGF_internal_tokens_destroy(RE_property_tokens);
 }
 
-// TODO err handling?
-void
+Err
 SGF_internal_init_single_value_str_property(SGF_Tokens tokens,
 					    enum SGF_Property property,
 					    char **dest)
 {
 	SGF_Tokens property_tokens =
 		SGF_internal_get_property_tokens(tokens, property);
-	if (property_tokens != NULL) {
-		if (property_tokens->len != 1) {
-			SGF_internal_tokens_destroy(property_tokens);
-			return;
-		}
-
-		SGF_Token *value_token = mrv_get_idx(property_tokens, 0);
-
-		*dest = malloc(strlen(value_token->text) + 1);
-		strcpy(*dest, value_token->text);
-
-		SGF_internal_tokens_destroy(property_tokens);
+	if (property_tokens == NULL) {
+		return ERR;
 	}
+
+	if (property_tokens->len != 1) {
+		SGF_internal_tokens_destroy(property_tokens);
+		return ERR;
+	}
+
+	SGF_Token *value_token = mrv_get_idx(property_tokens, 0);
+
+	*dest = malloc(strlen(value_token->text) + 1);
+	if (dest == NULL) {
+		SGF_internal_tokens_destroy(property_tokens);
+		return ERR;
+	}
+
+	strcpy(*dest, value_token->text);
+
+	SGF_internal_tokens_destroy(property_tokens);
+
+	return OK;
 }
 
 internal void

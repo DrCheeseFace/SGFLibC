@@ -185,7 +185,7 @@ void
 SGF_internal_init_RE(SGF_Tokens tokens, SGF_Result *dest)
 {
 	dest->player = SGF_PLAYER_NONE;
-	dest->tag = SGF_RESULT_TYPE_UNKNOWN;
+	dest->type = SGF_RESULT_TYPE_UNKNOWN;
 
 	SGF_Tokens RE_property_tokens =
 		SGF_internal_get_property_tokens(tokens, SGF_PROPERTIES_RE);
@@ -207,18 +207,18 @@ SGF_internal_init_RE(SGF_Tokens tokens, SGF_Result *dest)
 	case '0':
 	case 'D':
 		if (strcmp(text, "0") == 0 || strcmp(text, "Draw") == 0) {
-			dest->tag = SGF_RESULT_TYPE_DRAW;
+			dest->type = SGF_RESULT_TYPE_DRAW;
 		}
 		break;
 
 	case 'V':
 		if (strcmp(text, "Void") == 0) {
-			dest->tag = SGF_RESULT_TYPE_NO_RESULT;
+			dest->type = SGF_RESULT_TYPE_NO_RESULT;
 		}
 		break;
 
 	case '?':
-		dest->tag = SGF_RESULT_TYPE_UNKNOWN;
+		dest->type = SGF_RESULT_TYPE_UNKNOWN;
 		break;
 
 	case 'B':
@@ -231,19 +231,19 @@ SGF_internal_init_RE(SGF_Tokens tokens, SGF_Result *dest)
 
 			switch (reason[0]) {
 			case 'R':
-				dest->tag = SGF_RESULT_TYPE_RESIGNATION;
+				dest->type = SGF_RESULT_TYPE_RESIGNATION;
 				break;
 			case 'T':
-				dest->tag = SGF_RESULT_TYPE_TIME;
+				dest->type = SGF_RESULT_TYPE_TIME;
 				break;
 			case 'F':
-				dest->tag = SGF_RESULT_TYPE_FORFEIT;
+				dest->type = SGF_RESULT_TYPE_FORFEIT;
 				break;
 			case '\0':
-				dest->tag = SGF_RESULT_TYPE_UNKNOWN;
+				dest->type = SGF_RESULT_TYPE_UNKNOWN;
 				break;
 			default:
-				dest->tag = SGF_RESULT_TYPE_SCORE;
+				dest->type = SGF_RESULT_TYPE_SCORE;
 				dest->score = strtof(reason, NULL);
 				break;
 			}
@@ -251,7 +251,7 @@ SGF_internal_init_RE(SGF_Tokens tokens, SGF_Result *dest)
 		break;
 
 	default:
-		dest->tag = SGF_RESULT_TYPE_UNKNOWN;
+		dest->type = SGF_RESULT_TYPE_UNKNOWN;
 		break;
 	}
 

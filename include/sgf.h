@@ -20,7 +20,7 @@ enum SGF_Ruleset {
 };
 extern const char *SGF_ruleset_key[SGF_RULESET_COUNT];
 
-enum SGF_ResultTag {
+enum SGF_ResultType {
 	SGF_RESULT_TYPE_RESIGNATION,
 	SGF_RESULT_TYPE_TIME,
 	SGF_RESULT_TYPE_DRAW,
@@ -31,9 +31,9 @@ enum SGF_ResultTag {
 };
 
 typedef struct {
-        float score;
+	float score;
 	enum SGF_Player player;
-	enum SGF_ResultTag tag;
+	enum SGF_ResultType type;
 } SGF_Result;
 
 struct SGF_Move {

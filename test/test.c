@@ -357,21 +357,21 @@ MRT_TEST_GROUP(test_init_RE)
 	sgf_str = "RE[0]";
 	tokens = SGF_internal_tokeize(sgf_str);
 	SGF_internal_init_RE(tokens, &out_result);
-	MRT_ASSERT(out_result.tag == SGF_RESULT_TYPE_DRAW, "RE[0] is Draw");
+	MRT_ASSERT(out_result.type == SGF_RESULT_TYPE_DRAW, "RE[0] is Draw");
 	SGF_internal_tokens_destroy(tokens);
 
 	// draw
 	sgf_str = "RE[Draw]";
 	tokens = SGF_internal_tokeize(sgf_str);
 	SGF_internal_init_RE(tokens, &out_result);
-	MRT_ASSERT(out_result.tag == SGF_RESULT_TYPE_DRAW, "RE[Draw] is Draw");
+	MRT_ASSERT(out_result.type == SGF_RESULT_TYPE_DRAW, "RE[Draw] is Draw");
 	SGF_internal_tokens_destroy(tokens);
 
 	// void
 	sgf_str = "RE[Void]";
 	tokens = SGF_internal_tokeize(sgf_str);
 	SGF_internal_init_RE(tokens, &out_result);
-	MRT_ASSERT(out_result.tag == SGF_RESULT_TYPE_NO_RESULT,
+	MRT_ASSERT(out_result.type == SGF_RESULT_TYPE_NO_RESULT,
 		   "RE[Void] is No Result");
 	SGF_internal_tokens_destroy(tokens);
 
@@ -379,7 +379,7 @@ MRT_TEST_GROUP(test_init_RE)
 	sgf_str = "RE[?]";
 	tokens = SGF_internal_tokeize(sgf_str);
 	SGF_internal_init_RE(tokens, &out_result);
-	MRT_ASSERT(out_result.tag == SGF_RESULT_TYPE_UNKNOWN,
+	MRT_ASSERT(out_result.type == SGF_RESULT_TYPE_UNKNOWN,
 		   "RE[?] is Unknown");
 	SGF_internal_tokens_destroy(tokens);
 
@@ -389,7 +389,7 @@ MRT_TEST_GROUP(test_init_RE)
 	SGF_internal_init_RE(tokens, &out_result);
 	MRT_ASSERT(out_result.player == SGF_PLAYER_BLACK,
 		   "RE[B+R] player is Black");
-	MRT_ASSERT(out_result.tag == SGF_RESULT_TYPE_RESIGNATION,
+	MRT_ASSERT(out_result.type == SGF_RESULT_TYPE_RESIGNATION,
 		   "RE[B+R] is Resignation");
 	SGF_internal_tokens_destroy(tokens);
 
@@ -399,7 +399,7 @@ MRT_TEST_GROUP(test_init_RE)
 	SGF_internal_init_RE(tokens, &out_result);
 	MRT_ASSERT(out_result.player == SGF_PLAYER_WHITE,
 		   "RE[W+T] player is White");
-	MRT_ASSERT(out_result.tag == SGF_RESULT_TYPE_TIME, "RE[W+T] is Time");
+	MRT_ASSERT(out_result.type == SGF_RESULT_TYPE_TIME, "RE[W+T] is Time");
 	SGF_internal_tokens_destroy(tokens);
 
 	// Black Forfeit
@@ -408,7 +408,7 @@ MRT_TEST_GROUP(test_init_RE)
 	SGF_internal_init_RE(tokens, &out_result);
 	MRT_ASSERT(out_result.player == SGF_PLAYER_BLACK,
 		   "RE[B+F] player is Black");
-	MRT_ASSERT(out_result.tag == SGF_RESULT_TYPE_FORFEIT,
+	MRT_ASSERT(out_result.type == SGF_RESULT_TYPE_FORFEIT,
 		   "RE[B+F] is Forfeit");
 	SGF_internal_tokens_destroy(tokens);
 
@@ -418,7 +418,7 @@ MRT_TEST_GROUP(test_init_RE)
 	SGF_internal_init_RE(tokens, &out_result);
 	MRT_ASSERT(out_result.player == SGF_PLAYER_WHITE,
 		   "RE[W+3.5] player is White");
-	MRT_ASSERT(out_result.tag == SGF_RESULT_TYPE_SCORE,
+	MRT_ASSERT(out_result.type == SGF_RESULT_TYPE_SCORE,
 		   "RE[W+3.5] is Score");
 	MRT_ASSERT(fabsf(out_result.score - 3.5f) < FLT_EPSILON,
 		   "RE[W+3.5] score parsed as float");
@@ -430,7 +430,7 @@ MRT_TEST_GROUP(test_init_RE)
 	SGF_internal_init_RE(tokens, &out_result);
 	MRT_ASSERT(out_result.player == SGF_PLAYER_BLACK,
 		   "RE[B+] player is Black");
-	MRT_ASSERT(out_result.tag == SGF_RESULT_TYPE_UNKNOWN,
+	MRT_ASSERT(out_result.type == SGF_RESULT_TYPE_UNKNOWN,
 		   "RE[B+] missing reason fall back to unknown tag");
 	SGF_internal_tokens_destroy(tokens);
 }

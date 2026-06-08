@@ -79,6 +79,7 @@ SGF_read(FILE *file)
 						    &sgf->OT);
 	SGF_internal_init_single_value_str_property(tokens, SGF_PROPERTIES_RO,
 						    &sgf->RO);
+	SGF_internal_init_RE(tokens, &sgf->RE);
 
 	SGF_internal_init_variations(tokens, &sgf->variations,
 				     &sgf->variations_len);

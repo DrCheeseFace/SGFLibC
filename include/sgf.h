@@ -22,6 +22,11 @@ extern const char *SGF_ruleset_key[SGF_RULESET_COUNT];
 
 enum SGF_ResultTag {
 	SGF_RESULT_TYPE_RESIGNATION,
+	SGF_RESULT_TYPE_TIME,
+	SGF_RESULT_TYPE_DRAW,
+	SGF_RESULT_TYPE_FORFEIT,
+	SGF_RESULT_TYPE_NO_RESULT,
+	SGF_RESULT_TYPE_UNKNOWN,
 	SGF_RESULT_TYPE_SCORE,
 };
 
@@ -30,7 +35,7 @@ typedef struct {
 
 	enum SGF_ResultTag tag;
 	union {
-		uint16_t Score;
+		float Score;
 		char Resignation;
 	} score;
 } SGF_Result;
@@ -137,12 +142,12 @@ typedef struct {
 	// White Team: name of the White team.
 	char *WT;
 	// Komi: komi.
-	float KM;// TODO struct to hold other stuffs?
+	float KM; // TODO struct to hold other stuffs?
 
 	// Result: result, usually in the format "B+R" or "B+3.5".
 	SGF_Result RE;
-	// Time limit: time limit in seconds.
-	uint32_t TM;
+	// Time limit
+	uint16_t TM;
 	// Player: color of player to start.
 	enum SGF_Player PL;
 	// Rules: ruleset

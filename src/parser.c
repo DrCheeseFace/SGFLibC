@@ -101,6 +101,56 @@ SGF_internal_init_KM(SGF_Tokens tokens, float *dest)
 }
 
 void
+SGF_internal_init_single_value_uint16_property(SGF_Tokens tokens,
+					       enum SGF_Property property,
+					       uint16_t *dest)
+{
+	SGF_Tokens property_tokens =
+		SGF_internal_get_property_tokens(tokens, property);
+
+	if (property_tokens->len != 1) {
+		SGF_internal_tokens_destroy(property_tokens);
+		return;
+	}
+
+	SGF_Token *property_token = mrv_get_idx(property_tokens, 0);
+
+	unsigned long raw_value = strtoul(property_token->text, NULL, 10);
+	if (raw_value > UINT16_MAX) {
+		return;
+	}
+
+	*dest = (uint16_t)raw_value;
+
+	SGF_internal_tokens_destroy(property_tokens);
+}
+
+void
+SGF_internal_init_single_value_uint8_property(SGF_Tokens tokens,
+					      enum SGF_Property property,
+					      uint8_t *dest)
+{
+	SGF_Tokens property_tokens =
+		SGF_internal_get_property_tokens(tokens, property);
+
+	if (property_tokens->len != 1) {
+		SGF_internal_tokens_destroy(property_tokens);
+		return;
+	}
+
+	SGF_Token *property_token = mrv_get_idx(property_tokens, 0);
+
+	unsigned long raw_value = strtoul(property_token->text, NULL, 10);
+	if (raw_value > UINT8_MAX) {
+		return;
+	}
+
+	*dest = (uint8_t)raw_value;
+
+	SGF_internal_tokens_destroy(property_tokens);
+}
+
+void
 SGF_internal_init_RU(SGF_Tokens tokens, enum SGF_Ruleset *dest)
 {
 	*dest = SGF_RULESET_NONE;
@@ -129,6 +179,84 @@ SGF_internal_init_RU(SGF_Tokens tokens, enum SGF_Ruleset *dest)
 
 		SGF_internal_tokens_destroy(RU_property_tokens);
 	}
+}
+
+void
+SGF_internal_init_RE(SGF_Tokens tokens, SGF_Result *dest)
+{
+	dest->player = SGF_PLAYER_NONE;
+	dest->tag = SGF_RESULT_TYPE_UNKNOWN;
+
+	SGF_Tokens RE_property_tokens =
+		SGF_internal_get_property_tokens(tokens, SGF_PROPERTIES_RE);
+
+	if (RE_property_tokens == NULL) {
+		return;
+	}
+
+	if (RE_property_tokens->len != 1) {
+		SGF_internal_tokens_destroy(RE_property_tokens);
+		return;
+	}
+
+	SGF_Token *result_token = mrv_get_idx(RE_property_tokens, 0);
+	const char *text = result_token->text;
+
+	// FF[4] only
+	switch (text[0]) {
+	case '0':
+	case 'D':
+		if (strcmp(text, "0") == 0 || strcmp(text, "Draw") == 0) {
+			dest->tag = SGF_RESULT_TYPE_DRAW;
+		}
+		break;
+
+	case 'V':
+		if (strcmp(text, "Void") == 0) {
+			dest->tag = SGF_RESULT_TYPE_NO_RESULT;
+		}
+		break;
+
+	case '?':
+		dest->tag = SGF_RESULT_TYPE_UNKNOWN;
+		break;
+
+	case 'B':
+	case 'W':
+		dest->player =
+			(text[0] == 'B') ? SGF_PLAYER_BLACK : SGF_PLAYER_WHITE;
+
+		if (text[1] == '+') {
+			const char *reason = text + 2;
+
+			switch (reason[0]) {
+			case 'R':
+				dest->tag = SGF_RESULT_TYPE_RESIGNATION;
+				dest->score.Resignation = 1;
+				break;
+			case 'T':
+				dest->tag = SGF_RESULT_TYPE_TIME;
+				break;
+			case 'F':
+				dest->tag = SGF_RESULT_TYPE_FORFEIT;
+				break;
+			case '\0':
+				dest->tag = SGF_RESULT_TYPE_UNKNOWN;
+				break;
+			default:
+				dest->tag = SGF_RESULT_TYPE_SCORE;
+				dest->score.Score = strtof(reason, NULL);
+				break;
+			}
+		}
+		break;
+
+	default:
+		dest->tag = SGF_RESULT_TYPE_UNKNOWN;
+		break;
+	}
+
+	SGF_internal_tokens_destroy(RE_property_tokens);
 }
 
 // TODO err handling?

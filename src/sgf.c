@@ -17,7 +17,7 @@ const char *SGF_ruleset_key[SGF_RULESET_COUNT] = { "None", "Chinese",
 const char *SGF_player_key[SGF_PLAYER_COUNT] = { "B", "W", "" };
 
 SGF_Sgf *
-SGF_read(unused FILE *file)
+SGF_read(FILE *file)
 {
 	if (!file) {
 		return NULL;
@@ -46,8 +46,11 @@ SGF_read(unused FILE *file)
 						&sgf->AB, &sgf->AB_len);
 
 	SGF_internal_init_RU(tokens, &sgf->RU);
-
 	SGF_internal_init_KM(tokens, &sgf->KM);
+	SGF_internal_init_single_value_uint16_property(
+		tokens, SGF_PROPERTIES_TM, &sgf->TM);
+	SGF_internal_init_single_value_uint8_property(tokens, SGF_PROPERTIES_HA,
+						      &sgf->HA);
 
 	SGF_internal_init_single_value_str_property(tokens, SGF_PROPERTIES_AP,
 						    &sgf->AP);
@@ -63,6 +66,19 @@ SGF_read(unused FILE *file)
 						    &sgf->WR);
 	SGF_internal_init_single_value_str_property(tokens, SGF_PROPERTIES_BR,
 						    &sgf->BR);
+
+	SGF_internal_init_single_value_str_property(tokens, SGF_PROPERTIES_DT,
+						    &sgf->DT);
+	SGF_internal_init_single_value_str_property(tokens, SGF_PROPERTIES_EV,
+						    &sgf->EV);
+	SGF_internal_init_single_value_str_property(tokens, SGF_PROPERTIES_AN,
+						    &sgf->AN);
+	SGF_internal_init_single_value_str_property(tokens, SGF_PROPERTIES_GN,
+						    &sgf->GN);
+	SGF_internal_init_single_value_str_property(tokens, SGF_PROPERTIES_OT,
+						    &sgf->OT);
+	SGF_internal_init_single_value_str_property(tokens, SGF_PROPERTIES_RO,
+						    &sgf->RO);
 
 	SGF_internal_init_variations(tokens, &sgf->variations,
 				     &sgf->variations_len);
